@@ -1,0 +1,18 @@
+<div style="font-size: large; font-weight: bold; color: #474c50; display: flex; flex-direction: column; align-items: center">
+    <div>
+        <div class="input-group mb-3">
+            {{ item.form.limit(placeholder="limit", class="form-control") }}
+        </div>
+        <div class="input-group mb-3">
+            {{ item.form.run_env(placeholder="environment to run pipeline, e.g. aws, local", class="form-control") }}
+        </div>
+        <button type="button" class="btn btn-primary btn-block"
+                onclick="runPipeline('{{ item.href }}', {
+                    limit: document.getElementById('{{ item.name|e }}-limit').value,
+                    run_env: document.getElementById('{{ item.name|e }}-run_env')?.value,
+                    pipeline: '{{ item.name }}'
+                })">
+            run pipeline
+        </button>
+    </div>
+</div>

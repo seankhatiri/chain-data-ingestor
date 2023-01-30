@@ -1,0 +1,22 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Pipelines {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% import 'macros/tabs.html' as tabsHelper %}
+
+{% block content %}
+
+<div class="pcoded-content">
+    <div class="page-wrapper">
+        <!-- [ Main Content ] start -->
+        {{ tabsHelper.tabsContainer(tabs, 'Pipelines') }}
+    </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

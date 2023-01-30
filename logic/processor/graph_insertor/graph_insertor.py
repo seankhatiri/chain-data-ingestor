@@ -1,0 +1,1 @@
+#TODO define the NodeHandller as the first processor, receive new transactions or any data, then call Graph_insertor

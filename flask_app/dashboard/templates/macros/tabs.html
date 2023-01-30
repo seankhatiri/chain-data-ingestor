@@ -1,0 +1,38 @@
+{% macro tabHeader(item, isFirst) %}
+<li class="nav-item">
+    <a class="nav-link {{ 'active text-uppercase' if isFirst else ''}}" id="{{ item.name|e }}-tab"
+       data-toggle="tab" href="#{{ item.name|e }}"
+       role="tab" aria-controls="{{ item.name|e }}"
+       aria-selected="{{ true if isFirst else false }}">{{ item.title|e }}</a>
+</li>
+{% endmacro %}
+
+{% macro tabBody(item, isFirst) %}
+<div class="tab-pane {{ 'fade show active' if isFirst else '' }}" id="{{ item.name|e }}" role="tabpanel"
+     aria-labelledby="{{ item.name|e }}-tab">
+    {{ caller() }}
+</div>
+{% endmacro %}
+
+{% macro tabsContainer(tabs, title, file) %}
+<div class="row">
+    <!-- [ tabs ] start -->
+    <div class="col-sm-12">
+        <h5>{{ title }}</h5>
+        <hr>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            {% for item in tabs %}
+            {{ tabHeader(item, loop.first) }}
+            {% endfor %}
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            {% for item in tabs %}
+            {% call tabBody(item, loop.first) %}
+            {% include "macros/%s.html" % item.name %}
+
+            {% endcall %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endmacro %}

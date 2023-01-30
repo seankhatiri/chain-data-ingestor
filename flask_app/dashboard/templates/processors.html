@@ -1,0 +1,76 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Processors {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% import 'macros/tabs.html' as tabsHelper %}
+
+{% block content %}
+
+<div class="alert alert-info fade" role="alert" id="pipeline-run-alert">
+    Pipeline run initialized!
+</div>
+
+<div class="pcoded-content">
+    <div class="page-wrapper">
+        <!-- [ Main Content ] start -->
+
+        <div class="d-flex flex-column justify-content-center align-items-center">
+            <div class="d-flex flex-column font-weight-bold w-50">
+                Processors:
+                <div class="input-group mb-3" style="min-height: 250px">
+                    {{ form.processors(multiple=True) }}
+                </div>
+            </div>
+
+            <div class="d-flex flex-column font-weight-bold w-50">
+                Listings:
+                <div class="input-group mb-3">
+                    {{ form.listings(
+                    placeholder="listings mls nums, separated by comma",
+                    class="form-control") }}
+                </div>
+            </div>
+
+            <div class="d-flex flex-column font-weight-bold w-50">
+                Run Pipeline Environment:
+                <div class="input-group mb-3">
+                    {{ form.run_env(placeholder="environment to run pipeline, e.g. aws, local", class="form-control") }}
+                </div>
+            </div>
+            <div class="w-50">
+                <button type="button" class="btn btn-primary btn-block" id="run-pipeline-submit-button"
+                        onclick="runProcesses('{{ href }}',
+                     $('#Processor-processors').val(),
+                     document.getElementById('Processor-run_env')?.value,
+                     document.getElementById('Processor-listings')?.value,
+                )">
+                    run pipeline
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function runProcesses(href, processors, run_env, listings) {
+        $('#pipeline-run-alert').removeClass('fade');
+        $('#run-pipeline-submit-button').attr('disabled', 'disabled');
+        setTimeout(() => {
+            $('#pipeline-run-alert').addClass('fade');
+            $('#run-pipeline-submit-button').removeAttr('disabled');
+        }, 6000)
+        runPipeline(href, {
+            processors,
+            run_env,
+            listings,
+        })
+    }
+</script>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
