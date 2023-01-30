@@ -269,6 +269,8 @@ p.text-muted {
 }
 .card .card-block,
 .card .card-body {
+  background-color: #000;
+  backdrop-filter: blur(100px);
   padding: 30px 25px;
 }
 .card.card-load {
@@ -7390,6 +7392,7 @@ table.footable-paging-center > tfoot > tr.footable-paging > td {
       Authentication css start
 ==========================  **/
 .auth-wrapper {
+  background: #000000;
   position: relative;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -7479,12 +7482,12 @@ table.footable-paging-center > tfoot > tr.footable-paging > td {
 .auth-wrapper .auth-bg .r:first-child {
   top: -100px;
   right: -100px;
-  background: linear-gradient(-135deg, #1de9b6 0%, #1dc4e9 100%);
+  background: linear-gradient(to right, #FF1CF7 0%, #00F0FF 100%);
 }
 .auth-wrapper .auth-bg .r:last-child {
   left: -100px;
   bottom: -100px;
-  background: linear-gradient(-135deg, #899FD4 0%, #A389D4 100%);
+  background: linear-gradient(to right, #00F0FF 100%, #FF1CF7 0%);;
 }
 .auth-wrapper .auth-bg .r.s {
   width: 20px;
