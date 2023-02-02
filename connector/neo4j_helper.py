@@ -29,9 +29,9 @@ class Neo4jHelper:
     def connect(self):
         self.graph = Graph(self.url, auth = (self.username, self.password), secure = True)
 
-    def insert_node(self, data):
-        node = Node(data['type'], address = data['address'], detail = f''' {data['detail']}''') if 'detail' in data and data['detail'] \
-        else Node(data['type'], address = data['address'])
+    def insert_node(self, node):
+        node = Node(node['type'], address = node['address'], detail = f''' {node['detail']}''') if 'detail' in node and node['detail'] \
+        else Node(node['type'], address = node['address'])
         try:
             self.graph.create(node)
             print('node has been created')
@@ -39,8 +39,9 @@ class Neo4jHelper:
             print('node exists, pass ...')
             # Logger().error(str(e), title = 'node creation', additional_data = node)
     
-    def insert_relationship(self, source, relation, destination):
-        relationship = Relationship(source, relation, destination)
+    def insert_relationship(self, edge):
+        src, relation, dest = edge['src'], edge['edge_label'], edge['dest']
+        relationship = Relationship(src, relation, dest)
         try:
             self.graph.create(relationship)
             print('edge has been created')
