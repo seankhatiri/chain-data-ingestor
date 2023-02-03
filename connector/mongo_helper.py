@@ -99,6 +99,17 @@ class MongoHelper:
 
     def is_contract(self, address):
         return self.exists('contracts', {'contractAddress': address})
+    
+    def cache_contract(self, address, data):
+        contract = {
+            'contractAddress': address,
+            'SourceCode': data['SourceCode'],
+            'ABI': data['ABI'],
+            'ContractName': data['ContractName'],
+            'Proxy': data['Proxy']
+        }
+        self.insert_one(contract, 'contracts')
+    
 
 
 

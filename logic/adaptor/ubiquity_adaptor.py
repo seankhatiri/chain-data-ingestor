@@ -19,7 +19,7 @@ class UbiquityAdaptor(Adaptor):
         page_token = result['next_page_token']
         if page_token:
             endpoint += f"&page_token={page_token}"
-        self.ubiquity_helper.search(endpoint)
+        return self.ubiquity_helper.search(endpoint)
         
     def fetch_contracts(self):
         # TODO: implement the fetch_contract from ubiquity_helper

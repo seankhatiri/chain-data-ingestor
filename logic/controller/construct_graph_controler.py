@@ -17,6 +17,5 @@ class ConstructGraphControler(metaclass=Singleton):
 
     
     def run_pipeline_local(self):
-        #TODO implement pipeline and processors, then run mainpipeline from here
         MainPipeline().run()
         pass

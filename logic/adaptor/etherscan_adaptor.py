@@ -20,8 +20,8 @@ class EtherscanAdaptor(Adaptor):
             'address': address
         }
         result = self.etherscan_helper.search(search_filters)
-        self._cache_contract(result)
-        return result
+        if len(result) != 0: self.mongo_helper.cache_contract(address, result[0])
+        return result[0]
 
     #TODO let's find is that possible to fetch batch of ethereum transactions from etherscan
     def fetch_transactions(self):
@@ -30,12 +30,9 @@ class EtherscanAdaptor(Adaptor):
     def fetch_contracts(self):
         return super().fetch_contracts()
 
-    def _cache_contract(self, data):
-        contract = {
-            'contractAddress': data['contractAddress'],
-            'sourceCode': data['sourceCode'],
-            'ABI': data['ABI'],
-            'ContractName': data['ContractName'],
-            'Proxy': data['Proxy']
-        }
-        self.mongo_helper.insert_one(contract, 'contracts')
+    def is_contract(self, address):
+        if self.mongo_helper.is_contract(address) : return True
+        result = self.fetch_contract(address)
+        if result['SourceCode'] != '': return True
+        return False
+

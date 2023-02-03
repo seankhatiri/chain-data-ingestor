@@ -25,7 +25,7 @@ class ChainscanHelper:
                     "apikey": self.apikey
                 }
                 response = requests.get(self.url, params=payload)
-                if response.json()['status'] == 1:
+                if response.json()['status'] == '1':
                     result = response.json()['result']
                     return result
             except Exception as e:

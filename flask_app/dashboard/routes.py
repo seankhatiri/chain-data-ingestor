@@ -102,8 +102,9 @@ def index():
 @blueprint.route('/processors')
 @login_required
 def processors():
-    processors = ['processor1',
-                  'processor2'
+    processors = ['NodeProcessor',
+                  'EdgeProcessor',
+                  'GraphInsertor'
                   ]
     processor_form = ProcessorsForm(request.form)
     processor_form.processors.choices = [(p, p) for p in processors]
