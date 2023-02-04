@@ -10,6 +10,7 @@ from jinja2 import TemplateNotFound
 from flask_app.dashboard import blueprint
 from flask_app.dashboard.forms import RetryForm, UploadForm, FailurePipelineForm, MainPipelineForm, ProcessorsForm
 from logic.controller.construct_graph_controler import ConstructGraphControler
+from logic.pipeline.dynamic_pipeline.dynamic_pipeline import DynamicPipeline
 from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
 from utility.logger import Logger
@@ -29,13 +30,16 @@ def run_upload_pipeline():
         },
         'FailurePipeline': {
             'class': FailurePipeline
+        },
+        'DynamicPipeline': {
+            'class': DynamicPipeline
         }
     }
     data = request.get_json()
     controller = ConstructGraphControler()
     pipeline_class = pipelines[data['pipeline']]['class']
     data.pop('pipeline')
-    controller.graph_insertor()
+    controller.run_pipeline_local(MainPipeline)
     return {'result': 'ok'}
 
 
@@ -43,7 +47,14 @@ def run_upload_pipeline():
 @login_required
 def run_processors():
     data = request.get_json()
+    #extract txs_ids and selected_processors from the input box
+    txs_ids_str = None
+    if 'listings' in data and data['listings'] and data['listings'] != '':
+        txs_ids_str = data['listings']
+        data.pop('listings')
+    txs_ids = txs_ids_str.split(',')
     controller = ConstructGraphControler()
+    controller.run_pipeline_local(DynamicPipeline, txs_ids=txs_ids, **data)
     return {'result': 'ok'}
 
 

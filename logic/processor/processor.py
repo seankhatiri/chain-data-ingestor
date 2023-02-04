@@ -19,18 +19,18 @@ class Processor:
 
     def _process_dataset(self):
         Logger().info(f'processor started', title=self.__class__.__name__)
-        for tx in range(len(self.data)):
-            self._run_iteration(tx)
+        for tx_id in range(len(self.data)):
+            self._run_iteration(tx_id)
         Logger().info(f'processor finished', title=self.__class__.__name__)
 
-    def _run_iteration(self, tx):
-        tx_id = self.data[tx]['id']
-        try:
-            ok, error = self._iterate(tx)
-            if not ok:
-                self.data[tx]['partial'] = True
-        except Exception as e:
-            Logger().error(str(e), additional_data=tx_id)
+    def _run_iteration(self, tx_id):
+        self._iterate(tx_id)
+        # try:
+        #     ok, error = self._iterate(tx)
+        #     if not ok:
+        #         self.data[tx]['partial'] = True
+        # except Exception as e:
+        #     Logger().error(str(e), additional_data=tx_id)
     
-    def _iterate(self) -> Tuple[bool, Optional[str]]:
+    def _iterate(self, tx_id) -> Tuple[bool, Optional[str]]:
         pass

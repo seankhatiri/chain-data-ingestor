@@ -20,8 +20,10 @@ class EtherscanAdaptor(Adaptor):
             'address': address
         }
         result = self.etherscan_helper.search(search_filters)
-        if len(result) != 0: self.mongo_helper.cache_contract(address, result[0])
-        return result[0]
+        if len(result) != 0: 
+            self.mongo_helper.cache_contract(address, result[0])
+            return result[0]
+        return None
 
     #TODO let's find is that possible to fetch batch of ethereum transactions from etherscan
     def fetch_transactions(self):
@@ -31,8 +33,9 @@ class EtherscanAdaptor(Adaptor):
         return super().fetch_contracts()
 
     def is_contract(self, address):
-        if self.mongo_helper.is_contract(address) : return True
+        if self.mongo_helper.is_contract(address) and self.mongo_helper.find_one('contracts', {'contractAddress': address})['SourceCode'] != '': 
+            return True
         result = self.fetch_contract(address)
-        if result['SourceCode'] != '': return True
+        # TODO: if etherscan does note have any verified contract it return '' as sourceCode but it might be a contract without verifide code or a user, how to differentiat?
+        if result and result['SourceCode'] != '': return True
         return False
-

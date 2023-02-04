@@ -11,20 +11,23 @@ from logic.processor.node_processor.node_processor import NodeProcessor
 
 class DynamicPipeline(Pipeline):
     selected_processors: list
-    txs: list
+    txs_ids: list
 
+    def __init__(self, selected_processors, txs_ids=None):
+        self.selected_processors = selected_processors
+        self.txs_ids = txs_ids
+        self.mongo_helper = MongoHelper(Configs.mongo_url)
+        self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
+        self.data_adaptor = DBAdaptor(self.mongo_helper, self.neo4j_helper, txs_ids)
+        self.processors = self.get_processors(self.mongo_helper, self.neo4j_helper)
+    
     def get_processors(self, mongo_helper=None, neo4j_helper=None):
         processors = {
-            'NodeProcessor': lambda: NodeProcessor(mongo_helper, neo4j_helper),
-            'EdgeProcessor': lambda: EdgeProcessor(mongo_helper, neo4j_helper),
-            'GraphInsertor': lambda: GraphInsertor(mongo_helper, neo4j_helper)
+            'NodeProcessor': NodeProcessor(mongo_helper, neo4j_helper),
+            'EdgeProcessor': EdgeProcessor(mongo_helper, neo4j_helper),
+            'GraphInsertor': GraphInsertor(mongo_helper, neo4j_helper)
         }
         return [processors[p] for p in self.selected_processors]
 
-    def __init__(self, selected_processors, txs):
-        self.selected_processors = selected_processors
-        self.txs = txs
-        self.mongo_helper = MongoHelper(Configs.mongo_url)
-        self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
-        self.data_adaptor = DBAdaptor(self.mongo_helper)
-        self.processors = self.get_processors(self.mongo_helper, self.neo4j_helper)
+    def get_fetch_txs_kwargs(self, **kwargs):
+        return {'tx_ids': self.txs_ids}

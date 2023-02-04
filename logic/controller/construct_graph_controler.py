@@ -16,6 +16,7 @@ class ConstructGraphControler(metaclass=Singleton):
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
 
     
-    def run_pipeline_local(self):
-        MainPipeline().run()
+    def run_pipeline_local(self, class_, txs_ids=None, **kwargs):
+        # TODO: How to handel the inputs for each pipeline like txs and selected_processors for dynamic_pipeline
+        class_(kwargs['processors'], txs_ids).run()
         pass

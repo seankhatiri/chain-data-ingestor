@@ -15,7 +15,7 @@ class Neo4jHelper:
         self.username = username
         self.password = password
         self.connect()
-        self.add_constraints() #we have constrain for nodes, but edges don't need constrain
+        self.add_constraints()
     
     def add_constraints(self):
         try:
@@ -48,7 +48,8 @@ class Neo4jHelper:
             print('edge exists, pass ...')
             Logger().error(str(e), title = 'relationship creation', additional_data = relationship)
 
-    def find_one_node(self, type, address) -> Node:
+    def find_one_node(self, type=None, address=None) -> Node:
+        type = self._find_node_type(address) if not type else type
         query = f"MATCH (n:{type} {{address: '{address}'}}) RETURN n"
         result = self.graph.run(query).data()
         return result[0]["n"] if result else None
@@ -106,12 +107,9 @@ class Neo4jHelper:
         try: 
             relationships = self.get_relationships(src, dest)
             for relationship in relationships:
-                print(type(str(relationship.__class__.__name__)))
                 if relationship.__class__.__name__ == old_label:
-                    print('2')
                     self.delete_relationship(src, old_label, dest)
                     self.insert_relationship(src, new_label, dest)
-                    print('3')
         except Exception as e:
             Logger().error(str(e), title='update edge label')
 
@@ -123,5 +121,10 @@ class Neo4jHelper:
 
     def get_directed_relationships(self, src: Node):
         pass # return incomming and outgoing edges
+
+    def _find_node_type(self, address):
+        node_type_query = f"MATCH (n) WHERE n.address = '{address}' RETURN labels(n) AS node_type"
+        result = self.graph.run(node_type_query).data()
+        return result[0]['node_type'][0]
 
 
