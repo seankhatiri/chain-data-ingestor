@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     # neo4j_helper.update_node('CONTRACT', address, data)
     # result = neo4j_helper.find_one_node('CONTRACT', address)
-    # neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
+    neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
     # address = '0xD533a949740bb3306d119CC777fa900bA034cd52'
     # node_test_1 = {
     #     'type': 'USER',
@@ -35,5 +35,7 @@ if __name__ == '__main__':
     # print(neo4j_helper.get_relationships(node1, node2))
     # neo4j_helper.insert_relationship(node1, 'test2', node2)
     # neo4j_helper.update_relationship(node1, 'test', 'new_test', node2)
-
-
+    neo4j_helper.update_node('CONTRACT', '0x22F9dCF4647084d6C31b2765F6910cd85C178C18', {
+        'sourceCode':'',
+        'ContractName': 'test'
+    })

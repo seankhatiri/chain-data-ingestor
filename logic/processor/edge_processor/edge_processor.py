@@ -20,7 +20,6 @@ class EdgeProcessor(Processor):
                 contract_address = event['meta']['contract']
                 # TODO: we should add different labels based on some other processors here, like payTip
                 self.edges.append(self._get_edges_kwargs(event['source'], 'hasInteraction', event['destination']))
-        print(self.edges)
 
     def _handel_builtin_transfer_txs(self, tx):
         for event in self.data[tx]['events']:

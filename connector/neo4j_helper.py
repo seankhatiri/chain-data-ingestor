@@ -99,6 +99,7 @@ class Neo4jHelper:
         node = self.find_one_node(type, address)
         for key, value in data.items():
             node[key] = value
+        print('node has been updated')
         self.graph.push(node)
         return node
 
@@ -110,6 +111,7 @@ class Neo4jHelper:
                 if relationship.__class__.__name__ == old_label:
                     self.delete_relationship(src, old_label, dest)
                     self.insert_relationship(src, new_label, dest)
+                    print('edge has been updated')
         except Exception as e:
             Logger().error(str(e), title='update edge label')
 

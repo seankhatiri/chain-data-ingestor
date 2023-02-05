@@ -66,9 +66,9 @@ class MongoHelper:
 
     def get_all(self, collection_name, condition=None, limit=None):
         if limit is None:
-            result = self.db[collection_name].find(condition).batch_size(100)
+            result = self.db[collection_name].find(condition).batch_size(10)
         else:
-            result = self.db[collection_name].find(condition).limit(limit).batch_size(100)
+            result = self.db[collection_name].find(condition).limit(limit).batch_size(10)
 
         results = []
         for data in result:

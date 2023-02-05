@@ -11,8 +11,6 @@ class GraphInsertor(Processor):
     def _iterate(self, tx_id):
         nodes = self.data[tx_id]['nodes']
         edges = self.data[tx_id]['edges']
-        # for node in self.data[tx_id]['nodes']:
-        #     if node['type'] == 'USER': print(node['address'], node['detail'])
         for node in nodes:
             self.neo4j_helper.insert_node(node) if not self.neo4j_helper.find_one_node(node['type'], node['address']) else \
                 self.neo4j_helper.update_node(node['type'], node['address'], node['detail'])

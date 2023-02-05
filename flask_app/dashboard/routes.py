@@ -48,11 +48,11 @@ def run_upload_pipeline():
 def run_processors():
     data = request.get_json()
     #extract txs_ids and selected_processors from the input box
-    txs_ids_str = None
+    txs_ids = None
     if 'listings' in data and data['listings'] and data['listings'] != '':
         txs_ids_str = data['listings']
         data.pop('listings')
-    txs_ids = txs_ids_str.split(',')
+        txs_ids = txs_ids_str.split(',')
     controller = ConstructGraphControler()
     controller.run_pipeline_local(DynamicPipeline, txs_ids=txs_ids, **data)
     return {'result': 'ok'}

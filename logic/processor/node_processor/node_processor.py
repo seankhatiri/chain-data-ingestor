@@ -29,8 +29,8 @@ class NodeProcessor(Processor):
         if type == 'CONTRACT':
             contract = self.etherscan_adaptor.fetch_contract(address)
             detail = {
-                'SourceCode': contract['SourceCode'] ,
-                'ContractName': contract['ContractName']
+                'ContractName': contract['ContractName'],
+                'SourceCode': contract['SourceCode']
             } if type == 'CONTRACT' else {}
             nodes.append({'type': type, 'address': address, 'detail': detail})
         if type == 'USER':

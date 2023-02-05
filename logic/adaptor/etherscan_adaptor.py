@@ -20,7 +20,7 @@ class EtherscanAdaptor(Adaptor):
             'address': address
         }
         result = self.etherscan_helper.search(search_filters)
-        if len(result) != 0: 
+        if len(result) != 0 and result[0]['SourceCode'] != '': 
             self.mongo_helper.cache_contract(address, result[0])
             return result[0]
         return None
