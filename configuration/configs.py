@@ -17,3 +17,7 @@ class Configs(Singleton):
     neo4j_url: str = config('NEO4J_URL', default='')
     neo4j_user: str = config('NEO4J_USERNAME')
     neo4j_pass: str = config('NEO4J_PASSWORD')
+    etherscan_apikey: str = config('ETHERSCAN_APIKEY')
+    etherscan_url: str = config('ETHERSCAN_URL')
+    ubiquity_apikey: str = config('UBIQUITY_APIKEY')
+    ubiquity_url: str = config('UBIQUITY_URL')

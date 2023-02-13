@@ -66,9 +66,9 @@ class MongoHelper:
 
     def get_all(self, collection_name, condition=None, limit=None):
         if limit is None:
-            result = self.db[collection_name].find(condition).batch_size(100)
+            result = self.db[collection_name].find(condition).batch_size(10)
         else:
-            result = self.db[collection_name].find(condition).limit(limit).batch_size(100)
+            result = self.db[collection_name].find(condition).limit(limit).batch_size(10)
 
         results = []
         for data in result:
@@ -99,6 +99,17 @@ class MongoHelper:
 
     def is_contract(self, address):
         return self.exists('contracts', {'contractAddress': address})
+    
+    def cache_contract(self, address, data):
+        contract = {
+            'contractAddress': address,
+            'SourceCode': data['SourceCode'],
+            'ABI': data['ABI'],
+            'ContractName': data['ContractName'],
+            'Proxy': data['Proxy']
+        }
+        self.insert_one(contract, 'contracts')
+    
 
 
 
