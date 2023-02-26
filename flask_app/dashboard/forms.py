@@ -25,6 +25,8 @@ class ProcessorsForm(FlaskForm):
                                      choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
     listings = TextAreaField('listings', id='Processor-listings')
     run_env = StringField('run_env', id='Processor-run_env')
+    from_block = StringField('from_block', id='Processor-from_block')
+    to_block = StringField('to_block', id='Processor-to_block')
 
 
 
