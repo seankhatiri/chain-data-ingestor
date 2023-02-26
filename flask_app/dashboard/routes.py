@@ -115,6 +115,7 @@ def index():
 def processors():
     processors = ['NodeProcessor',
                   'EdgeProcessor',
+                  'EdgeInterpreter',
                   'GraphInsertor'
                   ]
     processor_form = ProcessorsForm(request.form)
