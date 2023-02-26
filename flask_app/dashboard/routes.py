@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask import render_template, request, url_for
+from flask import render_template, request, url_for, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 
@@ -13,12 +13,26 @@ from logic.controller.construct_graph_controler import ConstructGraphControler
 from logic.pipeline.dynamic_pipeline.dynamic_pipeline import DynamicPipeline
 from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
+from logic.controller.search_controler import SearchControler
 from utility.logger import Logger
 
 
 @blueprint.route("/health-check")
 def health_check():
     return 'healthy', 200
+
+@blueprint.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query')
+    if query:
+        return SearchControler().search(query)
+    else:
+        return "missed user query, add the query param in this way: ?query='the query string'&hop=int"
+    
+@blueprint.route('/submit', methods=['POST'])
+def submit():
+    data = request.json
+    return jsonify({'message': f'Received data: {data}'})
 
 
 @blueprint.route('/pipelines/start', methods=['POST'])

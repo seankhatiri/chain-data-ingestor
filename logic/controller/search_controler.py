@@ -15,7 +15,7 @@ class SearchControler(metaclass=Singleton):
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
 
     def search(self, query):
-        pass
+        return 'under development'
 
     def _seed_entity_finder(self, query):
         pass

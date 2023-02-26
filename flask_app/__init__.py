@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from logic.controller.construct_graph_controler import ConstructGraphControler
-
+from logic.controller.search_controler import SearchControler
 from configuration.configs import Configs
 
 template_dir = os.path.abspath('templates')
@@ -44,7 +44,6 @@ def create_app(config):
     register_blueprints(_app)
     configure_database(_app)
     controller = ConstructGraphControler()
-    router(_app)
     if Configs.mode == 'stage':
         pass
     elif Configs.mode == 'test':
@@ -53,17 +52,3 @@ def create_app(config):
         pass
 
     return _app
-
-def router(app):
-    @app.route('/hello', methods=['GET'])
-    def search():
-        query = request.args.get('query')
-        if query:
-            return f"Hello, {query}!"
-        else:
-            return "missed user query"
-    @app.route('/submit', methods=['POST'])
-    def submit():
-        data = request.json
-        return jsonify({'message': f'Received data: {data}'})
-    pass
