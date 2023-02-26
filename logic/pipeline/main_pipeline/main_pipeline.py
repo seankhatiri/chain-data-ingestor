@@ -5,6 +5,7 @@ from logic.adaptor.ubiquity_adaptor import UbiquityAdaptor
 from logic.processor.edge_processor.edge_processor import EdgeProcessor
 from logic.processor.graph_insertor.graph_insertor import GraphInsertor
 from logic.processor.node_processor.node_processor import NodeProcessor
+from logic.processor.edge_interpreter.edge_interpreter import EdgeInterpreter
 from utility.singleton import Singleton
 from logic.pipeline.pipeline import Pipeline
 
@@ -17,6 +18,7 @@ class MainPipeline(Pipeline):
         return[
             NodeProcessor(mongo_helper, neo4j_helper, data_adaptor),
             EdgeProcessor(mongo_helper, neo4j_helper, data_adaptor),
+            EdgeInterpreter(mongo_helper, neo4j_helper, data_adaptor),
             GraphInsertor(mongo_helper, neo4j_helper, data_adaptor)
         ]
 

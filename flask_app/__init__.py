@@ -3,11 +3,11 @@ from importlib import import_module
 from threading import Timer
 from time import sleep
 
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from logic.controller.construct_graph_controler import ConstructGraphControler
-
+from logic.controller.search_controler import SearchControler
 from configuration.configs import Configs
 
 template_dir = os.path.abspath('templates')

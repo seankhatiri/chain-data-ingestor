@@ -17,6 +17,10 @@ class GraphInsertor(Processor):
         for edge in edges:
             src = self.neo4j_helper.find_one_node(address=edge['src'])
             dest = self.neo4j_helper.find_one_node(address=edge['dest'])
-            self.neo4j_helper.insert_relationship(src, edge['label'], dest) if \
+            properties = {
+                'interaction': edge['interaction'],
+                'interpretation': edge['interpretation']
+            }
+            self.neo4j_helper.insert_relationship(src, edge['label'], dest, properties) if \
                 not self.neo4j_helper.find_one_relationship(src, edge['label'], dest) else \
-                    self.neo4j_helper.update_relationship(src, None, edge['label'], dest)   
+                    self.neo4j_helper.update_relationship(src, None, edge['label'], dest, properties)   
