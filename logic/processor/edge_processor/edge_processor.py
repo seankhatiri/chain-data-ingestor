@@ -18,8 +18,8 @@ class EdgeProcessor(Processor):
             # TODO: we have some txs that just have a 'fee' on event without any dest (~30k), process them
             if 'destination' in event and 'meta' in event and 'contract' in event['meta']:
                 #Note_Patrck: add the main_func field to each event that has a meta, meaning the interacted func_code + payload, meaning the argument to the interacted func
-                funcs, internal_funcs = self._func_code_handler(event['func_code'], event['payload'], event['meta']['contract'])
-                self.edges.append(self._get_edges_kwargs(event['source'], 'hasInteraction', event['destination'], funcs, internal_funcs))
+                func, internal_funcs = self._func_code_handler(event['func_code'], event['func_name'], event['func_input'], event['meta']['contract'])
+                self.edges.append(self._get_edges_kwargs(event['source'], 'hasInteraction', event['destination'], func, internal_funcs))
 
     def _handel_builtin_transfer_txs(self, tx):
         for event in self.data[tx]['events']:
