@@ -24,8 +24,9 @@ def health_check():
 @blueprint.route('/search', methods=['GET'])
 def search():
     query = request.args.get('query')
-    if query:
-        return SearchControler().search(query)
+    hop = request.args.get('hop')
+    if query and hop:
+        return SearchControler().search(query, hop)
     else:
         return "missed user query, add the query param in this way: ?query='the query string'&hop=int"
     
