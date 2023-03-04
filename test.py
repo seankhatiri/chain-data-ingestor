@@ -2,6 +2,7 @@ import requests
 from logic.adaptor.etherscan_adaptor import EtherscanAdaptor
 from connector.neo4j_helper import Neo4jHelper
 from configuration.configs import Configs
+from logic.controller.search_controler import SearchControler
 
 if __name__ == '__main__':
     '''
@@ -35,7 +36,12 @@ if __name__ == '__main__':
     # print(neo4j_helper.get_relationships(node1, node2))
     # neo4j_helper.insert_relationship(node1, 'test2', node2)
     # neo4j_helper.update_relationship(node1, 'test', 'new_test', node2)
-    neo4j_helper.update_node('CONTRACT', '0x22F9dCF4647084d6C31b2765F6910cd85C178C18', {
-        'sourceCode':'',
-        'ContractName': 'test'
-    })
+    # neo4j_helper.update_node('CONTRACT', '0x22F9dCF4647084d6C31b2765F6910cd85C178C18', {
+    #     'sourceCode':'',
+    #     'ContractName': 'test'
+    # })
+
+    # result = SearchControler().seed_entity_finder('test')
+    # print(result)
+    # print(neo4j_helper.get_subgraph('0x4559CA770e7f95fce15Bc54C8D09AbDD3B5c660C', 2))
+    print(SearchControler().ranker(neo4j_helper.get_subgraph('0x537A0A5654045C52eC45c4c86ED0c1Ffe893809d', 2), seed_node=neo4j_helper.find_one_node(address='0x537A0A5654045C52eC45c4c86ED0c1Ffe893809d')))

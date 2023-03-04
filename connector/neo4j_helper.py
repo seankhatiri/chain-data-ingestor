@@ -54,6 +54,11 @@ class Neo4jHelper:
         result = self.graph.run(query).data()
         return result[0]["n"] if result else None
     
+    def find_node_by_attribute(self, attribute) -> Node:
+        query = f"MATCH (n:{type} {{ContractName: '{attribute}'}}) RETURN n"
+        result = self.graph.run(query).data()
+        return result[0]["n"] if result else None
+    
     def find_one_relationship(self, src: Node, label: str, dest: Node):
         query = f"MATCH (a)-[r:{label}]->(b) WHERE a.address = '{src['address']}' AND b.address = '{dest['address']}' RETURN r"
         result = self.graph.run(query).data()
@@ -128,5 +133,15 @@ class Neo4jHelper:
         node_type_query = f"MATCH (n) WHERE n.address = '{address}' RETURN labels(n) AS node_type"
         result = self.graph.run(node_type_query).data()
         return result[0]['node_type'][0]
+        
+    def get_subgraph(self, address, hop=1):
+        # return 'nodes': [Node(type, address, detail), ...], 'relationshsips': [edge_label(src_node, dest_node), ...]
+        query = f"MATCH (n) WHERE n.address = '{address}' CALL apoc.path.subgraphAll(n, {{maxLevel: {hop}}}) YIELD nodes, relationships RETURN nodes, relationships"
+        result = self.graph.run(query).data()
+        return result[0]
+
+    def get_relationship_attributes(self, relationship: Relationship):
+        return relationship.start_node, relationship.type, relationship.end_node
+
 
 
