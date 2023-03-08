@@ -32,7 +32,7 @@ class EdgeProcessor(Processor):
         func = {
             'name': func_name,
             'code' : func_code,
-            'payload': payload
+            'args': payload
         }
         return func, internal_funcs
 

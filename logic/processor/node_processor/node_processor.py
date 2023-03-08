@@ -28,6 +28,7 @@ class NodeProcessor(Processor):
         nodes = self.data[tx]['nodes']
         if type == 'CONTRACT':
             contract = self.etherscan_adaptor.fetch_contract(address)
+            #TODO: after enrichment, add tags, social_media_description, and token_names here
             detail = {
                 'ContractName': contract['ContractName'],
                 'SourceCode': contract['SourceCode']

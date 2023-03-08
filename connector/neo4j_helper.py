@@ -126,17 +126,24 @@ class Neo4jHelper:
     def is_user(self, address):
         return True if self.find_one_node('USER', address) else False
 
-    def get_directed_relationships(self, src: Node):
-        pass # return incomming and outgoing edges
+    def get_outgoing_edges(self, sub_graph: Graph = None, src: Node = None):
+        query = f"MATCH (n)-[r]->(m) WHERE id(n) = {src.identity} RETURN r"
+        results = sub_graph.run(query) if sub_graph else self.graph.run(query)
+        edges = []
+        for record in results:
+            edge = record[0]
+            edges.append(edge)
+        return edges if len(edges) != 0 else None
 
     def _find_node_type(self, address):
         node_type_query = f"MATCH (n) WHERE n.address = '{address}' RETURN labels(n) AS node_type"
         result = self.graph.run(node_type_query).data()
         return result[0]['node_type'][0]
         
-    def get_subgraph(self, address, hop=1):
+    def get_subgraph(self, address, max_hop=1):
+        #TODO: it should return Graph obj to be used in get_outgoing_edges method
         # return 'nodes': [Node(type, address, detail), ...], 'relationshsips': [edge_label(src_node, dest_node), ...]
-        query = f"MATCH (n) WHERE n.address = '{address}' CALL apoc.path.subgraphAll(n, {{maxLevel: {hop}}}) YIELD nodes, relationships RETURN nodes, relationships"
+        query = f"MATCH (n) WHERE n.address = '{address}' CALL apoc.path.subgraphAll(n, {{maxLevel: {max_hop}}}) YIELD nodes, relationships RETURN nodes, relationships"
         result = self.graph.run(query).data()
         return result[0]
 
