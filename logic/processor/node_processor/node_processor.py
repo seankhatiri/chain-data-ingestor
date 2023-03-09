@@ -13,33 +13,46 @@ class NodeProcessor(Processor):
     def _iterate(self, tx):
         self.data[tx]['nodes'] = []
         self._preprocess_contracts(tx)
+        self._handel_main_tx_nodes(tx)
         for event in self.data[tx]['events']:
-            if not self.etherscan_adaptor.is_contract(event['source']):
-                self._insert_node('USER', tx, event['source'])
-            else:
-                self._insert_node('CONTRACT', tx, event['source'])
+            self._insert_node(tx, event['source'])
             if 'destination' in event:
-                if not self.etherscan_adaptor.is_contract(event['destination']):
-                    self._insert_node('USER', tx, event['destination'])
-                else:
-                    self._insert_node('CONTRACT', tx, event['destination'])
+                self._insert_node(tx, event['destination'])
     
-    def _insert_node(self, type, tx, address):
+    def _insert_node(self, tx, address):
         nodes = self.data[tx]['nodes']
-        if type == 'CONTRACT':
+        node_type = 'CONTRACT' if self.etherscan_adaptor.is_contract(address) else 'USER'
+        if node_type == 'CONTRACT':
             contract = self.etherscan_adaptor.fetch_contract(address)
-            #TODO: after enrichment, add tags, social_media_description, and token_names here
-            detail = {
-                'ContractName': contract['ContractName'],
-                'SourceCode': contract['SourceCode']
-            } if type == 'CONTRACT' else {}
-            nodes.append({'type': type, 'address': address, 'detail': detail})
-        if type == 'USER':
-            nodes.append({'type': type, 'address': address, 'detail': {}})
+            #TODO: after enrichment, add tags, social_media_description based on token in detail
+            detail = self._get_node_detail_kwargs(contract)
+            nodes.append({'type': node_type, 'address': address, 'detail': detail})
+        if node_type == 'USER':
+            nodes.append({'type': node_type, 'address': address, 'detail': {}})
 
     def _preprocess_contracts(self, tx):
         for event in self.data[tx]['events']:
             if 'meta' in event and 'contract' in event['meta']:
-                self._insert_node('CONTRACT', tx, event['meta']['contract'])
+                self._insert_node(tx, event['meta']['contract'])
+
+    def _handel_main_tx_nodes(self, tx):
+        self._insert_node(tx, self.data[tx]['from'])
+        self._insert_node(tx, self.data[tx]['to'])
+
+    def _extract_token_names(self, contract_name):
+        return True if 'token' in contract_name.lower() else return False
+
+    def _get_node_detail_kwargs(self, node):
+        token = node['ContractName'] if self._extract_token_names(node['Contractname']) else 'NOT TOKEN CONTRACT'
+        detail = {
+            'ContractName': contract['ContractName'],
+            'SourceCode': contract['SourceCode'],
+            'Token': token
+        }
+        return detail
+
+    def _fetch_social_media_description(self, token):
+        #use coinMarketCap endpoint to receive context based on TokenName
+        pass
 
 # interesting: 0xad9f9d1f2ea57643fdc9c89d89b8b275ea85413b2d7cfad76c9ff3aafeabb397
