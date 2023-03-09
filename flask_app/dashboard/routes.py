@@ -7,6 +7,7 @@ from flask import render_template, request, url_for, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 
+
 from flask_app.dashboard import blueprint
 from flask_app.dashboard.forms import RetryForm, UploadForm, FailurePipelineForm, MainPipelineForm, ProcessorsForm
 from logic.controller.construct_graph_controler import ConstructGraphControler
@@ -14,19 +15,48 @@ from logic.pipeline.dynamic_pipeline.dynamic_pipeline import DynamicPipeline
 from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
 from logic.controller.search_controler import SearchControler
-from utility.logger import Logger
-
+from utility.logger import Logger 
 
 @blueprint.route("/health-check")
 def health_check():
     return 'healthy', 200
+
+def costumSerializable(sub_graph):
+    #Since we can't serialize neo2py Relationship objects, we implement a custom serializable here
+    simple_obj = []
+    for item in sub_graph:
+        nodes = item['nodes']
+        relationships = item['relationships']
+        paths = item['paths']
+        simple_paths = []
+        for path in paths:
+            simple_path = {}
+            simple_path['score'] = path['score']
+            simple_path['path'] = []
+            for rel in path['path']:
+                simple_rel = {}
+                simple_rel['label'] = rel.__class__.__name__
+                simple_rel['start_node'] = rel.start_node
+                simple_rel['end_node'] = rel.end_node
+                simple_path['path'].append(simple_rel)
+            simple_paths.append(simple_path)
+        simple_relationships = []
+        for rel in relationships:
+            simple_rel = {}
+            simple_rel['label'] = rel.__class__.__name__
+            simple_rel['start_node'] = rel.start_node
+            simple_rel['end_node'] = rel.end_node
+            simple_relationships.append(simple_rel)
+        simple_obj.append({'nodes': nodes, 'relationships': simple_relationships, 'paths': simple_paths})
+    return simple_obj
 
 @blueprint.route('/search', methods=['GET'])
 def search():
     query = request.args.get('query')
     hop = request.args.get('hop')
     if query and hop:
-        return SearchControler().search(query, hop)
+        result = SearchControler().search(query, hop)
+        return jsonify(result=costumSerializable(result))
     else:
         return "missed user query, add the query param in this way: ?query='the query string'&hop=int"
     

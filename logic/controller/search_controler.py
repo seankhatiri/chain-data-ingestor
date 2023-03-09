@@ -17,42 +17,43 @@ class SearchControler(metaclass=Singleton):
         self.mongo_helper = MongoHelper(Configs.mongo_url, debug=self.debug)
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
         # download the necessary resources for nltk
-        # nltk.download('punkt')
-        # nltk.download('averaged_perceptron_tagger')
+        nltk.download('punkt')
+        nltk.download('averaged_perceptron_tagger')
 
     def search(self, query, hop):
         sub_graphs = []
-        path_scores = set()
+        path_scores = []
         seed_entities = self.seed_entity_finder(query)
         seed_nodes = self.find_seed_nodes(seed_entities)
         for seed_node in seed_nodes:
-            sub_graph = self.neo4j_helper.get_subgraph(seed_node, max_hop=hop)
-            sub_graphs.append(sub_graph)
+            sub_graph = self.neo4j_helper.get_subgraph(seed_node['address'], max_hop=hop)
             paths = self.simple_graph_traversal(sub_graph, seed_node, max_hop=hop)
             for path in paths:
                 score = self.calculate_similarity_score(query, path)
-                path_scores.add({
+                path_scores.append({
                     'path': path,
                     'score': score
                 })
-        return sub_graphs, path_scores
+            sub_graph['paths'] = path_scores
+            sub_graphs.append(sub_graph)
+        return sub_graphs
 
 
     def simple_graph_traversal(self, sub_graph, seed_node, max_hop):
         #return paths in this structure -> [{path, score}], path -> R(ei,ej),...
-        paths = set()
+        paths = []
         visited = set()
         stack = [(seed_node, [])]
         while stack:
             node, path = stack.pop()
             visited.add(node)
-            if len(path) <= max_hop and self.neo4j_helper.get_outgoing_edges(src=node) != None:
+            if len(path) <= int(max_hop) and self.neo4j_helper.get_outgoing_edges(src=node) != None:
                 #TODO: it searching on all graph, improve that to just search on returned sub-graph
                 for edge in self.neo4j_helper.get_outgoing_edges(src=node):
                     if edge.end_node not in visited:
                         stack.append((edge.end_node, path + [edge]))
             else:
-                paths.add(frozenset(path))
+                paths.append(path)
         return paths
 
     def seed_entity_finder(self, query):
@@ -75,57 +76,43 @@ class SearchControler(metaclass=Singleton):
             if self.neo4j_helper.find_node_by_attribute(attribute=entity): nodes.append(self.neo4j_helper.find_node_by_attribute(attribute=entity))
         return nodes
 
-    def calculate_similarity_score(query, paths):
+    def calculate_similarity_score(self, query, path):
         # Load a sentence-similarity transformer from Hugging Face
         model_name = 'sentence-transformers/paraphrase-distilroberta-base-v1'
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
         model.eval()
-        # def _get_context(paths):
-        #     context = ''
-        #     for edge in paths:
-        #         src_node = self.neo4j_helper.find_one_node(edge.start_node)
-        #         dest_node = self.neo4j_helper.find_one_node(edge.end_node)
-        #         if src_node['type'] == 'USER':
-        #         context += f"{src_node['address']}"
-        #         else:
-        #             #TODO: add the contract enriched context here
-        #             context += f"{src_node['address']} {src_node['detail']['ContractName']}"
-        #         context += f"call function:{edge['interaction']['func']['name']} args:{edge['interaction']['func']['args']} interpretation:{edge['interpretation']}"
-        #         if dest_node['type'] == 'USER':
-        #             context += f"{dest_node['address']}"
-        #         else:
-        #             context += f"{src_node['address']} {src_node['detail']['ContractName']}"
-        #     return context
-
         # Encode the input sentences and calculate their similarity score
         with torch.no_grad():
+            context = self.get_similarity_context(path)
             inputs = tokenizer.encode_plus(query, context, return_tensors='pt', padding=True)
             outputs = model(**inputs)
             logits = outputs.logits
             score = torch.softmax(logits, dim=1)[0][1].item()
-
         return score
-
-    def ranker(self, sub_graph, seed_node):
-        #recieves sub-graph, traverse recursively, find the overal score (for each path) = sum(score in each srtep), return the top-k
-        counter = 0
-        all_paths = []
-        current_path = []
-        relationships = sub_graph['relationships']
-        def ranker_traverse(node, path, prev_node=None):
-            for relationship in relationships:
-                src, dest = self._get_kwargs_relationship(relationship)
-                if node['address'] == src['address'] and (node['address'] != prev_node['address'] if prev_node else 1): 
-                    prev_node = src
-                    current_path.append(path + [relationship])
-                    return ranker_traverse(dest, current_path)
-                else: return all_paths.append(current_path)
-            # I need to add a condition: if there isn't any outgoing edges, or visiting prev_node (for now skip the loops)
-        return len(all_paths)
+    
+    def get_similarity_context(self, path):
+        context = ''
+        for edge in path:
+            src_node = self.neo4j_helper.find_one_node(address=edge.start_node['address'])
+            dest_node = self.neo4j_helper.find_one_node(address=edge.end_node['address'])
+            if self.neo4j_helper._find_node_type(src_node['address']) == 'USER':
+                context += f" {src_node['address']} "
+            else:
+                #TODO: add the contract enriched context here
+                context += f" {src_node['address']} {src_node['ContractName']} "
+                #TODO: When run the new edge_interpreter, uncomment below line
+            # context += f"call function:{edge['interaction']['func']['name']} args:{edge['interaction']['func']['args']} interpretation:{edge['interpretation']}"
+            context += f"{edge.__class__.__name__}"
+            if self.neo4j_helper._find_node_type(dest_node['address']) == 'USER':
+                context += f" {dest_node['address']} "
+            else:
+                context += f" {dest_node['address']} {dest_node['ContractName']} "
+        return context
 
     
     # *****************Advance Graph Traversal **************************
+    
     # def _get_kwargs_relationship(self, relationship, context=False):
     #     src, edge_label, dest = self.neo4j_helper.get_relationship_attributes(relationship)
     #     return f'{src} {edge_label} {dest}' if context else src, dest
@@ -163,3 +150,20 @@ class SearchControler(metaclass=Singleton):
     #             top_k_nodes.add(src_node)
     #             top_k_nodes.add(dest_node)
     #     return top_k_nodes, top_k_relationships
+
+    # def ranker(self, sub_graph, seed_node):
+    #     #recieves sub-graph, traverse recursively, find the overal score (for each path) = sum(score in each srtep), return the top-k
+    #     counter = 0
+    #     all_paths = []
+    #     current_path = []
+    #     relationships = sub_graph['relationships']
+    #     def ranker_traverse(node, path, prev_node=None):
+    #         for relationship in relationships:
+    #             src, dest = self._get_kwargs_relationship(relationship)
+    #             if node['address'] == src['address'] and (node['address'] != prev_node['address'] if prev_node else 1): 
+    #                 prev_node = src
+    #                 current_path.append(path + [relationship])
+    #                 return ranker_traverse(dest, current_path)
+    #             else: return all_paths.append(current_path)
+    #         # I need to add a condition: if there isn't any outgoing edges, or visiting prev_node (for now skip the loops)
+    #     return len(all_paths)
