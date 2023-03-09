@@ -36,10 +36,6 @@ MarkupSafe==2.1.2
 monotonic==1.6
 neo4j==5.5.0
 numpy==1.24.2
-nvidia-cublas-cu11==11.10.3.66
-nvidia-cuda-nvrtc-cu11==11.7.99
-nvidia-cuda-runtime-cu11==11.7.99
-nvidia-cudnn-cu11==8.5.0.96
 packaging==23.0
 pansi==2020.7.3
 pipreqs==0.4.11
@@ -85,3 +81,4 @@ zipp==3.11.0
 zope.event==4.6
 zope.interface==5.5.2
 zstandard==0.19.0
+nltk==3.8.1

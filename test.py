@@ -1,8 +1,8 @@
-import requests
 from logic.adaptor.etherscan_adaptor import EtherscanAdaptor
 from connector.neo4j_helper import Neo4jHelper
 from configuration.configs import Configs
 from logic.controller.search_controler import SearchControler
+from flask import render_template, request, url_for, jsonify
 
 if __name__ == '__main__':
     '''
@@ -49,27 +49,4 @@ if __name__ == '__main__':
     node = neo4j_helper.find_one_node(type='USER', address= "0xa88235065D97A56719Ea7D4Fe72F8f953C984C0B")
     sub_graph = neo4j_helper.get_subgraph(node['address'], 3)
     paths = SearchControler().simple_graph_traversal(sub_graph, node, 2)
-
-    def get_context(paths):
-        contexts = []
-        for path in paths:
-            context = ''
-            for edge in path:
-                src_node = neo4j_helper.find_one_node(address=edge.start_node['address'])
-                dest_node = neo4j_helper.find_one_node(address=edge.end_node['address'])
-                print(type(edge))
-            #     if src_node['type'] == 'USER':
-            #         context += f"{src_node['address']}"
-            #     else:
-            #         #TODO: add the contract enriched context here
-            #         context += f"{src_node['address']} {src_node['detail']['ContractName']}"
-            #     # context += f"call function:{edge['interaction']['func']['name']} args:{edge['interaction']['func']['args']} interpretation:{edge['interpretation']}"
-            #     context +- f"{edge['type']}"
-            #     if dest_node['type'] == 'USER':
-            #         context += f"{dest_node['address']}"
-            #     else:
-            #         context += f"{src_node['address']} {src_node['detail']['ContractName']}"
-            # contexts.append(context)
-        return contexts
-    print(get_context(paths))
-
+    print(SearchControler().search('0xa88235065D97A56719Ea7D4Fe72F8f953C984C0B', 2))

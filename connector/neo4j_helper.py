@@ -30,7 +30,10 @@ class Neo4jHelper:
         self.graph = Graph(self.url, auth = (self.username, self.password), secure = True)
 
     def insert_node(self, node):
-        node = Node(node['type'], address = node['address'], detail = f''' {node['detail']}''')
+        if node['type'] == 'CONTRACT':
+            node = Node(node['type'], address = node['address'], ContractName = node['detail']['ContractName'], SourceCode = f''' {node['detail']['SourceCode']}''' )
+        else:
+             node = Node(node['type'], address = node['address'], detail = f''' {node['detail']}''')
         try:
             self.graph.create(node)
             print('node has been created')
@@ -55,7 +58,7 @@ class Neo4jHelper:
         return result[0]["n"] if result else None
     
     def find_node_by_attribute(self, attribute) -> Node:
-        query = f"MATCH (n:{type} {{ContractName: '{attribute}'}}) RETURN n"
+        query = f"MATCH (n) WHERE n.ContractName = '{attribute}' RETURN n"
         result = self.graph.run(query).data()
         return result[0]["n"] if result else None
     
@@ -138,7 +141,7 @@ class Neo4jHelper:
     def _find_node_type(self, address):
         node_type_query = f"MATCH (n) WHERE n.address = '{address}' RETURN labels(n) AS node_type"
         result = self.graph.run(node_type_query).data()
-        return result[0]['node_type'][0]
+        return result[0]['node_type'][0] if result else None
         
     def get_subgraph(self, address, max_hop=1):
         #TODO: it should return Graph obj to be used in get_outgoing_edges method

@@ -1,5 +1,4 @@
 from flask_migrate import Migrate
-
 from configuration.configs import Configs
 from flask_app import create_app, db
 from flask_app.base.models import User
@@ -7,6 +6,7 @@ from utility.logger import Logger
 
 app = create_app(Configs)
 Migrate(app, db)
+
 
 
 @app.before_first_request
