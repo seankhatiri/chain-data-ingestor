@@ -21,3 +21,4 @@ class Configs(Singleton):
     etherscan_url: str = config('ETHERSCAN_URL')
     ubiquity_apikey: str = config('UBIQUITY_APIKEY')
     ubiquity_url: str = config('UBIQUITY_URL')
+    coinmarketcap_apikey: str = config('COINMARKETCAP_API_KEY')

@@ -18,6 +18,7 @@ class GraphInsertor(Processor):
             src = self.neo4j_helper.find_one_node(address=edge['src'])
             dest = self.neo4j_helper.find_one_node(address=edge['dest'])
             properties = {
+                'tx_id': edge['tx_id']
                 'interaction': edge['interaction'],
                 'interpretation': edge['interpretation']
             }

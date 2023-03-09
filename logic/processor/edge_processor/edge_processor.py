@@ -11,39 +11,43 @@ class EdgeProcessor(Processor):
         self.neo4j_helper = neo4j_helper
 
     def _iterate(self, tx):
+        tx_id = tx
         self.data[tx]['edges'] = []
         self.edges = self.data[tx]['edges']
-        self._handel_builtin_transfer_txs(tx)
+        self._handel_main_tx(tx)
         for event in self.data[tx]['events']:
-            # TODO: we have some txs that just have a 'fee' on event without any dest (~30k), process them
+            #TODO: handel situation that tx main from and to are in an event, skip that event
             if 'destination' in event and 'meta' in event and 'contract' in event['meta']:
-                #Note_Patrck: add the main_func field to each event that has a meta, meaning the interacted func_code + payload, meaning the argument to the interacted func
-                func, internal_funcs = self._func_code_handler(event['func_code'], event['func_name'], event['func_input'], event['meta']['contract'])
-                self.edges.append(self._get_edges_kwargs(event['source'], 'hasInteraction', event['destination'], func, internal_funcs))
+                if event['meta']['contract'] != event['source'] and event['meta']['contract'] != event['destination']
+                    self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event['meta']['contract']))
+                    self.edges.append(self._get_edges_kwargs(tx_id, event['meta']['contract'], 'tokenTransfer', event['destination']))
+                else:
+                    self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event[]'destination')) 
+            #events that just have 'destination' and don't have 'meta'
+            if 'destination' in event and 'meta' not in event:
+                self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event[]'destination')) 
 
-    def _handel_builtin_transfer_txs(self, tx):
-        for event in self.data[tx]['events']:
-            if 'meta' not in event and 'destination' in event:
-                self.edges.append(self._get_edges_kwargs(event['source'], 'etherTransfer', event['destination']))
+    def _handel_main_tx(self, tx_id):
+        tx = self.data[tx_id]
+        detail = self._func_code_handler(tx['func_name'], tx['func_signature'], tx['func_args'])
+        self.edges.append(self._get_edges_kwargs(tx_id, tx['from'], tx['func_signature'], tx['to'], detail))
 
-    def _func_code_handler(self, func_code, func_name, payload, contract_address):
-        # TODO: get the internal funcs code, names and attributes from AST util
-        internal_funcs = []
-        func = {
-            'name': func_name,
-            'code' : func_code,
-            'args': payload
+    def _edge_detail_handler(self, func_name, func_signature, func_args):
+        detail = {
+            'function_name': func_name,
+            'function_signature' : func_signature,
+            'function_args': func_args
         }
-        return func, internal_funcs
+        return detail
 
-    def _get_edges_kwargs(self, src, label, dest, func=None, internal_funcs=None):
+    def _get_edges_kwargs(self, tx, src, label, dest, detail=None):
         return {
                     'src': src,
                     'label': label,
-                    'dest': dest, 
+                    'dest': dest,
+                    'tx_id': tx
                     'interaction': {
-                        'func': func,
-                        'internal_funcs': internal_funcs
+                        'detail': detail
                     }, 
                     'interpretation': ''
             }

@@ -42,14 +42,14 @@ class Neo4jHelper:
             # Logger().error(str(e), title = 'node creation', additional_data = node)
         return node
     
-    def insert_relationship(self, src: Node, label: str, dest: Node):
-        relationship = Relationship(src, label, dest)
+    def insert_relationship(self, src: Node, label: str, dest: Node, properties):
+        relationship = Relationship(src, label, dest, properties=properties)
         try:
             self.graph.create(relationship)
             print('edge has been created')
         except Exception as e:
             print('edge exists, pass ...')
-            Logger().error(str(e), title = 'relationship creation', additional_data = relationship)
+            # Logger().error(str(e), title = 'relationship creation', additional_data = relationship)
 
     def find_one_node(self, type=None, address=None) -> Node:
         type = self._find_node_type(address) if not type else type
@@ -111,14 +111,14 @@ class Neo4jHelper:
         self.graph.push(node)
         return node
 
-    def update_relationship(self, src: Node, old_label, new_label, dest: Node):
+    def update_relationship(self, src: Node, old_label, new_label, dest: Node, properties=None):
         old_label=self.get_relationships(src, dest).__class__.__name__ if old_label is None else old_label
         try: 
             relationships = self.get_relationships(src, dest)
             for relationship in relationships:
                 if relationship.__class__.__name__ == old_label:
                     self.delete_relationship(src, old_label, dest)
-                    self.insert_relationship(src, new_label, dest)
+                    self.insert_relationship(src, new_label, dest, properties=properties)
                     print('edge has been updated')
         except Exception as e:
             Logger().error(str(e), title='update edge label')
