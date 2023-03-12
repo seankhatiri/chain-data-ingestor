@@ -40,7 +40,7 @@ class NodeProcessor(Processor):
         self._insert_node(tx, self.data[tx]['to'])
 
     def _extract_token_names(self, contract_name):
-        return True if 'token' in contract_name.lower() else return False
+        return True if 'token' in contract_name.lower() else False
 
     def _get_node_detail_kwargs(self, node):
         token = node['ContractName'] if self._extract_token_names(node['Contractname']) else 'NOT TOKEN CONTRACT'

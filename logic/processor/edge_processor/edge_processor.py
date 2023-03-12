@@ -18,14 +18,14 @@ class EdgeProcessor(Processor):
         for event in self.data[tx]['events']:
             #TODO: handel situation that tx main from and to are in an event, skip that event
             if 'destination' in event and 'meta' in event and 'contract' in event['meta']:
-                if event['meta']['contract'] != event['source'] and event['meta']['contract'] != event['destination']
+                if event['meta']['contract'] != event['source'] and event['meta']['contract'] != event['destination']:
                     self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event['meta']['contract']))
                     self.edges.append(self._get_edges_kwargs(tx_id, event['meta']['contract'], 'tokenTransfer', event['destination']))
                 else:
-                    self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event[]'destination')) 
+                    self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event['destination'])) 
             #events that just have 'destination' and don't have 'meta'
             if 'destination' in event and 'meta' not in event:
-                self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event[]'destination')) 
+                self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event['destination'])) 
 
     def _handel_main_tx(self, tx_id):
         tx = self.data[tx_id]
@@ -45,9 +45,7 @@ class EdgeProcessor(Processor):
                     'src': src,
                     'label': label,
                     'dest': dest,
-                    'tx_id': tx
-                    'interaction': {
-                        'detail': detail
-                    }, 
+                    'tx_id': tx,
+                    'interaction': detail, 
                     'interpretation': ''
             }

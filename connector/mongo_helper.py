@@ -62,7 +62,7 @@ class MongoHelper:
         return self.db[collection_name].update_many(condition, data, upsert=upsert)
 
     def update_one(self, condition, data, collection_name, upsert=False):
-        return self.db[collection_name].update(condition, data, upsert=upsert)
+        return self.db[collection_name].update_one(condition, {'$set': data}, upsert=upsert)
 
     def get_all(self, collection_name, condition=None, limit=None):
         if limit is None:
