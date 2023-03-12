@@ -16,6 +16,8 @@ from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
 from logic.controller.search_controler import SearchControler
 from utility.logger import Logger 
+from connector.neo4j_helper import Neo4jHelper
+from configuration.configs import Configs
 
 @blueprint.route("/health-check")
 def health_check():
@@ -59,6 +61,12 @@ def search():
         return jsonify(result=costumSerializable(result))
     else:
         return "missed user query, add the query param in this way: ?query='the query string'&hop=int"
+
+@blueprint.route('/test', methods=['GET'])
+def test():
+    neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
+    data = neo4j_helper.find_one_node(address='test')
+    return jsonify({'message': f'Received data: {data}'})
     
 @blueprint.route('/submit', methods=['POST'])
 def submit():

@@ -46,6 +46,7 @@ class SearchControler(metaclass=Singleton):
         stack = [(seed_node, [])]
         while stack:
             node, path = stack.pop()
+            #TODO: here we ignore loops, so we need to add (node, edge) to support loops too
             visited.add(node)
             if len(path) <= int(max_hop) and self.neo4j_helper.get_outgoing_edges(src=node) != None:
                 #TODO: it searching on all graph, improve that to just search on returned sub-graph
@@ -94,24 +95,23 @@ class SearchControler(metaclass=Singleton):
     def get_similarity_context(self, path):
         context = ''
         for edge in path:
-            src_node = self.neo4j_helper.find_one_node(address=edge.start_node['address'])
-            dest_node = self.neo4j_helper.find_one_node(address=edge.end_node['address'])
-            if self.neo4j_helper._find_node_type(src_node['address']) == 'USER':
-                context += f" {src_node['address']} "
-            else:
-                #TODO: add the contract enriched context here
-                context += f" {src_node['address']} {src_node['ContractName']} "
-                #TODO: When run the new edge_interpreter, uncomment below line
-            # context += f"call function:{edge['interaction']['func']['name']} args:{edge['interaction']['func']['args']} interpretation:{edge['interpretation']}"
-            context += f"{edge.__class__.__name__}"
-            if self.neo4j_helper._find_node_type(dest_node['address']) == 'USER':
-                context += f" {dest_node['address']} "
-            else:
-                context += f" {dest_node['address']} {dest_node['ContractName']} "
+            context += edge['interpretation']
+            #******************************** create context on the fly *******************************
+            # src_node = self.neo4j_helper.find_one_node(address=edge.start_node['address'])
+            # dest_node = self.neo4j_helper.find_one_node(address=edge.end_node['address'])
+            # if self.neo4j_helper._find_node_type(src_node['address']) == 'USER':
+            #     context += f" {src_node['address']} "
+            # else:
+            #     context += f" {src_node['address']} {src_node['ContractName']} {src_node['Token']} "
+            # context += f"call function:{edge['interaction']['function_signature']} args:{edge['interaction'][''function_args'']} interpretation:{edge['interpretation']}"
+            # if self.neo4j_helper._find_node_type(dest_node['address']) == 'USER':
+            #     context += f" {dest_node['address']} "
+            # else:
+            #     context += f" {dest_node['address']} {dest_node['ContractName']} {src_node['Token']} "
         return context
 
     
-    # *****************Advance Graph Traversal **************************
+    # ***************** Advance Graph Traversal **************************
     
     # def _get_kwargs_relationship(self, relationship, context=False):
     #     src, edge_label, dest = self.neo4j_helper.get_relationship_attributes(relationship)

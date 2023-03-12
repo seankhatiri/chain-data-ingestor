@@ -1,8 +1,12 @@
 from logic.adaptor.etherscan_adaptor import EtherscanAdaptor
 from connector.neo4j_helper import Neo4jHelper
+from connector.mongo_helper import MongoHelper
 from configuration.configs import Configs
 from logic.controller.search_controler import SearchControler
 from flask import render_template, request, url_for, jsonify
+from utility.contract_parser.contract_parser import ContractParser
+import json
+import subprocess
 
 if __name__ == '__main__':
     '''
@@ -13,6 +17,7 @@ if __name__ == '__main__':
     # neo4j_helper.update_node('CONTRACT', address, data)
     # result = neo4j_helper.find_one_node('CONTRACT', address)
     neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
+    mongo_helper = MongoHelper(Configs.mongo_url)
     # address = '0xD533a949740bb3306d119CC777fa900bA034cd52'
     # node_test_1 = {
     #     'type': 'USER',
@@ -46,7 +51,12 @@ if __name__ == '__main__':
     # print(neo4j_helper.get_subgraph('0x4559CA770e7f95fce15Bc54C8D09AbDD3B5c660C', 2))
     # print(SearchControler().ranker(neo4j_helper.get_subgraph('0x537A0A5654045C52eC45c4c86ED0c1Ffe893809d', 2), seed_node=neo4j_helper.find_one_node(address='0x537A0A5654045C52eC45c4c86ED0c1Ffe893809d')))
     # result = SearchControler().seed_entity_finder('0X3434324234, setName, Ethereum ENS')
-    node = neo4j_helper.find_one_node(type='USER', address= "0xa88235065D97A56719Ea7D4Fe72F8f953C984C0B")
-    sub_graph = neo4j_helper.get_subgraph(node['address'], 3)
-    paths = SearchControler().simple_graph_traversal(sub_graph, node, 2)
-    print(SearchControler().search('0xa88235065D97A56719Ea7D4Fe72F8f953C984C0B', 2))
+    
+    # node = neo4j_helper.find_one_node(type='USER', address= "0xa88235065D97A56719Ea7D4Fe72F8f953C984C0B")
+    # sub_graph = neo4j_helper.get_subgraph(node['address'], 3)
+    # paths = SearchControler().simple_graph_traversal(sub_graph, node, 2)
+    # print(SearchControler().search('0xa88235065D97A56719Ea7D4Fe72F8f953C984C0B', 2))
+
+    #ContractParser(mongo_helper).run()
+    print(neo4j_helper.find_one_node(address='test'))
+    

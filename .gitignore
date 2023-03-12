@@ -7,3 +7,6 @@ kafka-docker/
 .idea
 /venv
 /myenv
+/utility/contract_parser/data
+/utility/contract_parser/solidity-universal-parser
+

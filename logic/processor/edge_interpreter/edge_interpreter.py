@@ -15,22 +15,34 @@ class EdgeInterpreter(Processor):
         self.tokenizer = T5Tokenizer.from_pretrained('t5-base')
 
     #TODO: recieve code snippet, and a context, then provide a summery of the code, use codeBERT
-    def run_interpreter(self, edge):
+    def _get_context(self, edge):
         src = edge['src']
         dest = edge['dest']
-        func = edge['interaction']['func']
-        func_name = func['name']
-        func_code = func['code']
-        input = func['payload']
-        contract_address = 'TBD'
-        inputs = self.tokenizer(func_code, return_tensors='pt')
+        if edge['label'] == 'tokenTransfer':
+            return 'ERC20 Token Transfer'
+        context = f"Address {src} called {edge['interaction']['function_signature']} of contract {dest} with these arguments: {edge['interaction']['function_args']}"
+        if self.mongo_helper.is_contract(edge['dest']):
+            contract = self.mongo_helper.find_one('CONTRACT', edge['dest'])
+            func_description = ''
+            contract_description = ''
+            #TODO: handel the situation we have multiple func_name equal to edge['interaction']['function_name']
+            for class_ in contract['classes_']:
+                for func in class_['funcs']:
+                    if edge['interaction']['function_name'] == func['func_name']:
+                        func_description = func['func_documentation']
+                contract_description = class_['class_documentation']
+            explanation = self._get_explanation(contract_description, edge['interaction']['function_name'], edge['interaction']['function_args'], func_description)
+            context += f', or simply {explanation}'
+        return context
+    
+    def _get_explanation(self, contract_description, func_name, func_args, func_description):
+        inputs = self.tokenizer(contract_description, func_name, func_args, func_description, return_tensors='pt')
         outputs = self.model.generate(inputs['input_ids'])
         explanation = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        context = f'Address {src} called {func_name} from contract {contract_address}, to {explanation} with this transaction input: {input} '
-        return context
-        
+        return explanation
+    
     def _iterate(self, tx):
         edges = self.data[tx]['edges']
         for edge in edges:
-            edge['interpretation'] = self.run_interpreter(edge)
+            edge['interpretation'] = self._get_context(edge)
         pass
