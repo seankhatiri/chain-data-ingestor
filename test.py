@@ -58,5 +58,7 @@ if __name__ == '__main__':
     # print(SearchControler().search('0xa88235065D97A56719Ea7D4Fe72F8f953C984C0B', 2))
 
     #ContractParser(mongo_helper).run()
-    print(neo4j_helper.find_one_node(address='test'))
+
+
+
     
