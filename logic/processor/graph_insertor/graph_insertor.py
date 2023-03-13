@@ -1,5 +1,6 @@
 #TODO define the NodeHandller as the first processor, receive new transactions or any data, then call Graph_insertor
 from logic.processor.processor import Processor
+import json
 
 class GraphInsertor(Processor):
     
@@ -18,10 +19,8 @@ class GraphInsertor(Processor):
             src = self.neo4j_helper.find_one_node(address=edge['src'])
             dest = self.neo4j_helper.find_one_node(address=edge['dest'])
             properties = {
-                'tx_id': edge['tx_id'],
                 'interaction': edge['interaction'],
                 'interpretation': edge['interpretation']
             }
-            self.neo4j_helper.insert_relationship(src, edge['label'], dest, properties) if \
-                not self.neo4j_helper.find_one_relationship(src, edge['label'], dest) else \
-                    self.neo4j_helper.update_relationship(src, None, edge['label'], dest, properties)   
+            properties = json.dumps(properties)
+            self.neo4j_helper.insert_relationship(edge['tx_id'], src, edge['label'], dest, properties)

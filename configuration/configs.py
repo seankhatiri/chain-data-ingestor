@@ -22,3 +22,4 @@ class Configs(Singleton):
     ubiquity_apikey: str = config('UBIQUITY_APIKEY')
     ubiquity_url: str = config('UBIQUITY_URL')
     coinmarketcap_apikey: str = config('COINMARKETCAP_API_KEY')
+    coinmarketcap_url:str = config('COINMARKETCAP_URL')

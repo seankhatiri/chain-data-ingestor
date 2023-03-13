@@ -38,6 +38,8 @@ def costumSerializable(sub_graph):
             for rel in path['path']:
                 simple_rel = {}
                 simple_rel['label'] = rel.__class__.__name__
+                simple_rel['properties'] = rel['properties']
+                simple_rel['tx_id'] = rel['tx_id']
                 simple_rel['start_node'] = rel.start_node
                 simple_rel['end_node'] = rel.end_node
                 simple_path['path'].append(simple_rel)
@@ -46,6 +48,8 @@ def costumSerializable(sub_graph):
         for rel in relationships:
             simple_rel = {}
             simple_rel['label'] = rel.__class__.__name__
+            simple_rel['properties'] = rel['properties']
+            simple_rel['tx_id'] = rel['tx_id']
             simple_rel['start_node'] = rel.start_node
             simple_rel['end_node'] = rel.end_node
             simple_relationships.append(simple_rel)

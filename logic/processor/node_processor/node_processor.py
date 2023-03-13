@@ -1,12 +1,14 @@
 
 from logic.processor.processor import Processor
 from logic.adaptor.etherscan_adaptor import EtherscanAdaptor
+from logic.adaptor.cmc_adaptor import CMCAdaptor
 
 class NodeProcessor(Processor):
 
     def __init__(self, mongo_helper, neo4j_helper):
         super().__init__(mongo_helper, neo4j_helper)
         self.etherscan_adaptor = EtherscanAdaptor()
+        self.cmc_adaptor = CMCAdaptor()
         self.mongo_helper = mongo_helper
         self.neo4j_helper = neo4j_helper
 
@@ -26,9 +28,9 @@ class NodeProcessor(Processor):
             contract = self.etherscan_adaptor.fetch_contract(address)
             #TODO: after enrichment, add tags, social_media_description based on token in detail
             detail = self._get_node_detail_kwargs(contract)
-            nodes.append({'type': node_type, 'address': address, 'detail': detail})
+            nodes.append({'type': node_type, 'address': address.lower(), 'detail': detail})
         if node_type == 'USER':
-            nodes.append({'type': node_type, 'address': address, 'detail': {}})
+            nodes.append({'type': node_type, 'address': address.lower(), 'detail': {}})
 
     def _preprocess_contracts(self, tx):
         for event in self.data[tx]['events']:
@@ -41,18 +43,22 @@ class NodeProcessor(Processor):
 
     def _extract_token_names(self, contract_name):
         return True if 'token' in contract_name.lower() else False
+    
+    def _get_token_context(self, token):
+        token = token.replace('token', "")
+        return self.cmc_adaptor(token_name=token)
 
     def _get_node_detail_kwargs(self, node):
-        token = node['ContractName'] if self._extract_token_names(node['Contractname']) else 'NOT TOKEN CONTRACT'
+        if self._extract_token_names(node['ContractName']):
+            token['name'] = node['ContractName']
+            token['description'] = self._get_token_context(node['ContractName'])
+        else:
+            token = 'NOT TOKEN CONTRACT'
         detail = {
-            'ContractName': contract['ContractName'],
-            'SourceCode': contract['SourceCode'],
+            'ContractName': node['ContractName'],
+            'SourceCode': node['SourceCode'],
             'Token': token
         }
         return detail
-
-    def _fetch_social_media_description(self, token):
-        #use coinMarketCap endpoint to receive context based on TokenName
-        pass
 
 # interesting: 0xad9f9d1f2ea57643fdc9c89d89b8b275ea85413b2d7cfad76c9ff3aafeabb397

@@ -10,27 +10,28 @@ class EdgeProcessor(Processor):
         self.mongo_helper = mongo_helper
         self.neo4j_helper = neo4j_helper
 
-    def _iterate(self, tx):
-        tx_id = tx
-        self.data[tx]['edges'] = []
-        self.edges = self.data[tx]['edges']
-        self._handel_main_tx(tx)
-        for event in self.data[tx]['events']:
-            #TODO: handel situation that tx main from and to are in an event, skip that event
+    def _iterate(self, tx_id):
+        self.data[tx_id]['edges'] = []
+        self.edges = self.data[tx_id]['edges']
+        self.nodes = self.data[tx_id]['nodes']
+        tx_hash =self.data[tx_id]['id']
+        self._handel_main_tx(tx_id, tx_hash)
+        for event in self.data[tx_id]['events']:
+            if 'destination' in event:
+                if event['source'].lower() == self.data[tx_id]['from'] and event['destination'].lower() == self.data[tx_id]['to']: continue
             if 'destination' in event and 'meta' in event and 'contract' in event['meta']:
                 if event['meta']['contract'] != event['source'] and event['meta']['contract'] != event['destination']:
-                    self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event['meta']['contract']))
-                    self.edges.append(self._get_edges_kwargs(tx_id, event['meta']['contract'], 'tokenTransfer', event['destination']))
+                    self.edges.append(self._get_edges_kwargs(tx_hash, event['source'], 'tokenTransfer', event['meta']['contract']))
+                    self.edges.append(self._get_edges_kwargs(tx_hash, event['meta']['contract'], 'tokenTransfer', event['destination']))
                 else:
-                    self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event['destination'])) 
-            #events that just have 'destination' and don't have 'meta'
+                    self.edges.append(self._get_edges_kwargs(tx_hash, event['source'], 'tokenTransfer', event['destination'])) 
             if 'destination' in event and 'meta' not in event:
-                self.edges.append(self._get_edges_kwargs(tx_id, event['source'], 'tokenTransfer', event['destination'])) 
+                self.edges.append(self._get_edges_kwargs(tx_hash, event['source'], 'tokenTransfer', event['destination'])) 
 
-    def _handel_main_tx(self, tx_id):
+    def _handel_main_tx(self, tx_id, tx_hash):
         tx = self.data[tx_id]
-        detail = self._func_code_handler(tx['func_name'], tx['func_signature'], tx['func_args'])
-        self.edges.append(self._get_edges_kwargs(tx_id, tx['from'], tx['func_signature'], tx['to'], detail))
+        detail = self._edge_detail_handler(tx['func_name'], tx['func_signature'], tx['func_args'])
+        self.edges.append(self._get_edges_kwargs(tx_hash, tx['from'], tx['func_name'], tx['to'], detail))
 
     def _edge_detail_handler(self, func_name, func_signature, func_args):
         detail = {
@@ -40,12 +41,25 @@ class EdgeProcessor(Processor):
         }
         return detail
 
-    def _get_edges_kwargs(self, tx, src, label, dest, detail=None):
+    def _get_edges_kwargs(self, tx_hash, src, label, dest, detail=None):
         return {
-                    'src': src,
+                    'src': src.lower(),
                     'label': label,
-                    'dest': dest,
-                    'tx_id': tx,
+                    'dest': dest.lower(),
+                    'tx_id': tx_hash,
                     'interaction': detail, 
                     'interpretation': ''
             }
+
+    # ******************** CREATE SAMEAS EDGE BETWEEN SAME CONTRACTS ********************
+    # def _handel_same_contracts(self, tx_id, tx_hash):
+    #     nodes = []
+    #     for node in self.nodes:
+    #         if self.etherscan_helper.is_contract(node['address']):
+    #             nodes.append(node)
+    #     for first_node in nodes:
+    #         for second_node in nodes:
+    #             #TODO: prevent adding two 'sameAs' relationships here
+    #             if first_node['detail']['ContractName'] == second_node['detail']['ContractName'] and first_node['detail']['SourceCode'] == second_node['detail']['SourceCode'] and first_node['address'] != second_node['address']:
+    #                 self.data[tx_id]['edges'].append(self._get_edges_kwargs(tx_hash, first_node['address'], 'sameAs', second_node['address']))
+    #                 print('same contract has been found ...')
