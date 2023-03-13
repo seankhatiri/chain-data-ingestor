@@ -7,6 +7,7 @@ from logic.pipeline.pipeline import Pipeline
 from logic.processor.edge_processor.edge_processor import EdgeProcessor
 from logic.processor.graph_insertor.graph_insertor import GraphInsertor
 from logic.processor.node_processor.node_processor import NodeProcessor
+from logic.processor.edge_interpreter.edge_interpreter import EdgeInterpreter
 
 
 class DynamicPipeline(Pipeline):
@@ -25,7 +26,8 @@ class DynamicPipeline(Pipeline):
         processors = {
             'NodeProcessor': NodeProcessor(mongo_helper, neo4j_helper),
             'EdgeProcessor': EdgeProcessor(mongo_helper, neo4j_helper),
-            'GraphInsertor': GraphInsertor(mongo_helper, neo4j_helper)
+            'EdgeInterpreter': EdgeInterpreter(mongo_helper, neo4j_helper),
+            'GraphInsertor': GraphInsertor(mongo_helper, neo4j_helper),
         }
         return [processors[p] for p in self.selected_processors]
 

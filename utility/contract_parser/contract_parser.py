@@ -10,12 +10,14 @@ path_root = Path(__file__).parents[2]
 sys.path.append(str(path_root))
 from connector.mongo_helper import MongoHelper
 from configuration.configs import Configs
+from logic.adaptor.cmc_adaptor import CMCAdaptor
 
 
 class ContractParser:
 
     def __init__(self):
         self.mongo_helper = MongoHelper(Configs.mongo_url)
+        self.cmc_adaptor = CMCAdaptor()
 
     #first create json file for all contracts we have
     def _create_contracts_json(self):
@@ -62,41 +64,30 @@ class ContractParser:
         process3 = subprocess.Popen([cmd4] + args4, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     def update_contract(self, df, contract_address):
-        # for each contract_address in paraq, get classes -> contracts_code, for each class get funcs and for each func get comment 
-        # and code, update the contract's classes and class['funcs]
-    
-        # Filter the DataFrame to only include rows for the given contract address
+        #TODO: we have ~1k contracts with empty classes, address them
+
         contract_df = df[df['contract_address'] == contract_address]
-        # Initialize an empty list to hold the contract's classes
         classes = []
-        # Group the DataFrame by class name
         grouped = contract_df.groupby('class_name')
-        # Iterate over each group (i.e. each class) and extract its information
         for class_name, class_df in grouped:
-            # Extract the class code and documentation from the first row in the group
             class_code = class_df.iloc[0]['class_code']
             class_documentation = class_df.iloc[0]['class_documentation']
-            # Initialize an empty list to hold the class's functions
             funcs = []
-            # Iterate over each row in the group and extract the function information
             for _, row in class_df.iterrows():
                 func_name = row['func_name']
                 func_code = row['func_code']
                 func_documentation = row['func_documentation']
-                # Add the function information to the list of functions
                 funcs.append({
                     'func_name': func_name,
                     'func_code': func_code,
                     'func_documentation': func_documentation
                 })
-            # Add the class information (including its list of functions) to the list of classes
             classes.append({
                 'class_name': class_name,
                 'class_code': class_code,
                 'class_documentation': class_documentation,
                 'funcs': funcs
             })
-        # Return a dictionary containing the list of classes for the given contract address
         return {'classes': classes}
 
     def run(self):
@@ -108,5 +99,28 @@ class ContractParser:
             self.mongo_helper.update_one({'contractAddress': contract['contractAddress']}, self.update_contract(df, contract['contractAddress']), 'contracts')
             print(f"contract {contract['contractAddress']} has been updated")
 
+    def _token_map_handler(self):
+        #TODO: test below and run for all tokens in CMC
+        tokens_map = self.cmc_adaptor.fetch_tokens_map()
+        for token in tokens_map:
+            self.mongo_helper.insert_one(token, 'tokens')
+            # token = self.cmc_adaptor.fetch_token_info(token_name=token)
+            # self.mongo_helper.insert_one(token, 'tokens')
+
+    def _token_detail_handler(self):
+        tokens = self.mongo_helper.get_all('tokens')
+        counter = 0
+        for token in tokens:
+            if counter == 310: break
+            if 'detail' not in token.keys():
+                detail = self.cmc_adaptor.fetch_token_info(token_name=token['slug'])
+                if detail:
+                    print(detail)
+                    detail = {'detail': detail}
+                    self.mongo_helper.update_one({'id': token['id']}, detail, 'tokens')
+                    counter += 1
+            
+
 if __name__ == '__main__':
-    ContractParser().run()
+    # ContractParser().run()
+    ContractParser()._token_detail_handler()

@@ -31,25 +31,24 @@ class Neo4jHelper:
 
     def insert_node(self, node):
         if node['type'] == 'CONTRACT':
-            node = Node(node['type'], address = node['address'], ContractName = node['detail']['ContractName'], SourceCode = f''' {node['detail']['SourceCode']}''' )
+            node = Node(node['type'], address = node['address'].lower(), ContractName = node['detail']['ContractName'], SourceCode = f''' {node['detail']['SourceCode']}''' )
         else:
-             node = Node(node['type'], address = node['address'], detail = f''' {node['detail']}''')
+             node = Node(node['type'], address = node['address'].lower(), detail = f''' {node['detail']}''')
         try:
             self.graph.create(node)
-            print('node has been created')
+            Logger().info(message='node has been created')
         except Exception as e:
-            print('node exists, pass ...')
+            Logger().info(message='node exists, pass...')
             # Logger().error(str(e), title = 'node creation', additional_data = node)
         return node
     
-    def insert_relationship(self, src: Node, label: str, dest: Node, properties):
-        relationship = Relationship(src, label, dest, properties=properties)
+    def insert_relationship(self, tx_id: str, src: Node, label: str, dest: Node, properties):
+        relationship = Relationship(src, label, dest, **{"tx_id": tx_id}, properties=properties)
         try:
             self.graph.create(relationship)
-            print('edge has been created')
+            Logger().info(message='edge has been created')
         except Exception as e:
-            print('edge exists, pass ...')
-            # Logger().error(str(e), title = 'relationship creation', additional_data = relationship)
+            Logger().error(str(e), title = 'relationship creation', additional_data = relationship)
 
     def find_one_node(self, type=None, address=None) -> Node:
         type = self._find_node_type(address) if not type else type
@@ -107,8 +106,8 @@ class Neo4jHelper:
         node = self.find_one_node(type, address)
         for key, value in data.items():
             node[key] = value
-        print('node has been updated')
         self.graph.push(node)
+        print('node has been updated')
         return node
 
     def update_relationship(self, src: Node, old_label, new_label, dest: Node, properties=None):

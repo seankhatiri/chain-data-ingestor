@@ -1,3 +1,4 @@
+import json
 from utility.singleton import Singleton
 from configuration.configs import Configs
 from connector.mongo_helper import MongoHelper
@@ -16,9 +17,10 @@ class SearchControler(metaclass=Singleton):
         self.transactions = None
         self.mongo_helper = MongoHelper(Configs.mongo_url, debug=self.debug)
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
-        # download the necessary resources for nltk
-        nltk.download('punkt')
-        nltk.download('averaged_perceptron_tagger')
+        self.tokenizer = None
+        self.model = None
+        # nltk.download('punkt')
+        # nltk.download('averaged_perceptron_tagger')
 
     def search(self, query, hop):
         sub_graphs = []
@@ -58,7 +60,6 @@ class SearchControler(metaclass=Singleton):
         return paths
 
     def seed_entity_finder(self, query):
-        # question = "what is the director of batman movie?"
         tokens = nltk.word_tokenize(query)
         tagged_tokens = nltk.pos_tag(tokens)
         nouns = [word for word, pos in tagged_tokens if pos.startswith('N')]
@@ -78,16 +79,12 @@ class SearchControler(metaclass=Singleton):
         return nodes
 
     def calculate_similarity_score(self, query, path):
-        # Load a sentence-similarity transformer from Hugging Face
-        model_name = 'sentence-transformers/paraphrase-distilroberta-base-v1'
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        model.eval()
-        # Encode the input sentences and calculate their similarity score
+        if self.model is None:
+            self.load_model()
         with torch.no_grad():
             context = self.get_similarity_context(path)
-            inputs = tokenizer.encode_plus(query, context, return_tensors='pt', padding=True)
-            outputs = model(**inputs)
+            inputs = self.tokenizer.encode_plus(query, context, return_tensors='pt', padding=True)
+            outputs = self.model(**inputs)
             logits = outputs.logits
             score = torch.softmax(logits, dim=1)[0][1].item()
         return score
@@ -95,7 +92,8 @@ class SearchControler(metaclass=Singleton):
     def get_similarity_context(self, path):
         context = ''
         for edge in path:
-            context += edge['interpretation']
+            temp_context = json.loads(edge['properties'])
+            context += temp_context['interpretation']
             #******************************** create context on the fly *******************************
             # src_node = self.neo4j_helper.find_one_node(address=edge.start_node['address'])
             # dest_node = self.neo4j_helper.find_one_node(address=edge.end_node['address'])
@@ -110,7 +108,12 @@ class SearchControler(metaclass=Singleton):
             #     context += f" {dest_node['address']} {dest_node['ContractName']} {src_node['Token']} "
         return context
 
-    
+    def load_model(self):
+        model_name = 'sentence-transformers/paraphrase-distilroberta-base-v1'
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        self.model.eval()
+
     # ***************** Advance Graph Traversal **************************
     
     # def _get_kwargs_relationship(self, relationship, context=False):
