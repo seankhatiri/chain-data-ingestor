@@ -15,7 +15,9 @@ class CMCAdaptor(Adaptor):
 
     def fetch_token_info(self, token_name: str = None, token_contract_address: str = None):
         if self.mongo_helper.exists('tokens', {'name': token_name}): 
-            return self.mongo_helper.find_one('tokens', {'name': token_name})
+            token = self.mongo_helper.find_one('tokens', {'name': token_name})
+            if 'detail' in token.keys():
+                return self.mongo_helper.find_one('tokens', {'name': token_name})
         endpoint = f"/v2/cryptocurrency/info?address={token_contract_address}" if token_contract_address else f"/v2/cryptocurrency/info?slug={token_name}"
         result = self.cmc_helper.search(endpoint)
         if result:
