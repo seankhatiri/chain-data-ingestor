@@ -109,16 +109,13 @@ class ContractParser:
 
     def _token_detail_handler(self):
         tokens = self.mongo_helper.get_all('tokens')
-        counter = 0
         for token in tokens:
-            if counter == 310: break
             if 'detail' not in token.keys():
                 detail = self.cmc_adaptor.fetch_token_info(token_name=token['slug'])
                 if detail:
-                    print(detail)
+                    print(detail['id'])
                     detail = {'detail': detail}
                     self.mongo_helper.update_one({'id': token['id']}, detail, 'tokens')
-                    counter += 1
             
 
 if __name__ == '__main__':

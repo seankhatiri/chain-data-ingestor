@@ -46,7 +46,7 @@ class NodeProcessor(Processor):
     
     def _get_token_context(self, token):
         token = token.replace('token', "")
-        return self.cmc_adaptor(token_name=token)
+        return self.cmc_adaptor.fetch_token_info(token_name=token)
 
     def _get_node_detail_kwargs(self, node):
         if self._extract_token_names(node['ContractName']):
