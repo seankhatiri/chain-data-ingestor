@@ -30,12 +30,12 @@ class SearchControler(metaclass=Singleton):
         for seed_node in seed_nodes:
             sub_graph = self.neo4j_helper.get_subgraph(seed_node['address'], max_hop=hop)
             paths = self.simple_graph_traversal(sub_graph, seed_node, max_hop=hop)
-            for path in paths:
-                score = self.calculate_similarity_score(query, path)
-                path_scores.append({
-                    'path': path,
-                    'score': score
-                })
+            # for path in paths:
+            #     score = self.calculate_similarity_score(query, path)
+            #     path_scores.append({
+            #         'path': path,
+            #         'score': score
+            #     })
             sub_graph['paths'] = path_scores
             sub_graphs.append(sub_graph)
         return sub_graphs
@@ -48,15 +48,24 @@ class SearchControler(metaclass=Singleton):
         stack = [(seed_node, [])]
         while stack:
             node, path = stack.pop()
-            #TODO: here we ignore loops, so we need to add (node, edge) to support loops too
+            #TODO: here we ignore loops, add the check for visited_edges
             visited.add(node)
             if len(path) <= int(max_hop) and self.neo4j_helper.get_outgoing_edges(src=node) != None:
                 #TODO: it searching on all graph, improve that to just search on returned sub-graph
                 for edge in self.neo4j_helper.get_outgoing_edges(src=node):
-                    if edge.end_node not in visited:
+                    #TODO: test the same_tx_id rule for each path
+                    if not path:
+                        if edge.end_node not in visited:
+                            stack.append((edge.end_node, [edge]))
+                    elif edge.end_node not in visited and edge['tx_id'] == path[0]['tx_id']:
                         stack.append((edge.end_node, path + [edge]))
             else:
                 paths.append(path)
+        for path in paths:
+            for edge in path:
+                print(f"start node: {edge.start_node['address']}")
+                print(f"end node: {edge.end_node['address']}")
+            print('next_path')
         return paths
 
     def seed_entity_finder(self, query):
