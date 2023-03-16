@@ -1,5 +1,5 @@
 #TODO we need to add sth like mongoHelper but for Neo4J
-from py2neo import Graph, Node, Relationship
+from neo4j import GraphDatabase, basic_auth
 from utility.logger import Logger
 
 class Neo4jHelper:
@@ -27,15 +27,17 @@ class Neo4jHelper:
             pass
     
     def connect(self):
-        self.graph = Graph(self.url, auth = (self.username, self.password), secure = True)
+        uri = "bolt://localhost:7687"
+        username = "neo4j"
+        password = "4314382hos"
+        driver = GraphDatabase.driver(uri, auth=(username, password))
+        self.graph = driver.session()
 
-    def insert_node(self, node):
-        if node['type'] == 'CONTRACT':
-            node = Node(node['type'], address = node['address'].lower(), ContractName = node['detail']['ContractName'], SourceCode = f''' {node['detail']['SourceCode']}''' )
-        else:
-             node = Node(node['type'], address = node['address'].lower(), detail = f''' {node['detail']}''')
+    def insert_node(self, node_dict):
+        node = Node.from_dict(node_dict)
+        db_node = node.to_node()
         try:
-            self.graph.create(node)
+            self.graph.create(db_node)
             Logger().info(message='node has been created')
         except Exception as e:
             Logger().info(message='node exists, pass...')
@@ -152,5 +154,36 @@ class Neo4jHelper:
     def get_relationship_attributes(self, relationship: Relationship):
         return relationship.start_node, relationship.type, relationship.end_node
 
+class Node:
+    def __init__(self, node_type, address, **properties):
+        self.node_type = node_type
+        self.address = address.lower()
+        self.properties = properties
 
+    @classmethod
+    def from_dict(cls, node_dict):
+        node_type = node_dict['type']
+        address = node_dict['address']
+        properties = {}
 
+        if node_type == 'CONTRACT':
+            properties['ContractName'] = node_dict['detail']['ContractName']
+            properties['SourceCode'] = node_dict['detail']['SourceCode']
+        else:
+            properties['detail'] = node_dict['detail']
+
+        return cls(node_type, address, **properties)
+
+    def to_node(self):
+        return Node(self.node_type, self.address, **self.properties)
+
+class Relationship:
+    def __init__(self, tx_id, src_node, label, dest_node, properties=None):
+        tx_id: str, src: Node, label: str, dest: Node, properties
+        self.start_node_id = start_node_id
+        self.end_node_id = end_node_id
+        self.relationship_type = relationship_type
+        self.properties = properties or {}
+
+    def to_relationship(self):
+        return (self.start_node_id, self.relationship_type, self.end_node_id, self.properties)
