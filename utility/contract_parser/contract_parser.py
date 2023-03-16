@@ -108,15 +108,16 @@ class ContractParser:
             # self.mongo_helper.insert_one(token, 'tokens')
 
     def _token_detail_handler(self):
-        tokens = self.mongo_helper.get_all('tokens')
-        for token in tokens:
-            if 'detail' not in token.keys():
-                detail = self.cmc_adaptor.fetch_token_info(token_name=token['slug'])
-                if detail:
-                    print(detail['id'])
-                    detail = {'detail': detail}
-                    self.mongo_helper.update_one({'id': token['id']}, detail, 'tokens')
-            
+        remaining_tokens_num = self.mongo_helper.get_count('tokens', condition={'detail': {'$exists': False}})
+        while remaining_tokens_num != 0:
+            tokens = self.mongo_helper.get_all('tokens', condition={'detail': {'$exists': False}})
+            for token in tokens:
+                if 'detail' not in token.keys():
+                    detail = self.cmc_adaptor.fetch_token_info(token_name=token['slug'])
+                    if detail:
+                        print(detail['id'])
+                        detail = {'detail': detail}
+                        self.mongo_helper.update_one({'id': token['id']}, detail, 'tokens')
 
 if __name__ == '__main__':
     # ContractParser().run()
