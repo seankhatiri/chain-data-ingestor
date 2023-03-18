@@ -29,7 +29,7 @@ class SearchControler(metaclass=Singleton):
         seed_nodes = self.find_seed_nodes(seed_entities)
         for seed_node in seed_nodes:
             sub_graph = self.neo4j_helper.get_subgraph(seed_node['address'], max_hop=hop)
-            paths = self.simple_graph_traversal(sub_graph, seed_node, max_hop=hop)
+            paths = self.simple_graph_traversal(seed_node, max_hop=hop)
             for path in paths:
                 score = self.calculate_similarity_score(query, path)
                 path_scores.append({
@@ -41,24 +41,24 @@ class SearchControler(metaclass=Singleton):
         return sub_graphs
 
 
-    def simple_graph_traversal(self, sub_graph, seed_node, max_hop):
+    def simple_graph_traversal(self, seed_node, max_hop):
         #return paths in this structure -> [{path, score}], path -> R(ei,ej),...
         paths = []
-        visited = set()
+        visited = []
         stack = [(seed_node, [])]
         while stack:
             node, path = stack.pop()
             #TODO: here we ignore loops, need to add the check for visited_edges
-            visited.add(node)
-            if len(path) <= int(max_hop) and self.neo4j_helper.get_outgoing_edges(src=node) != None:
+            visited.append(node)
+            if len(path) <= int(max_hop) and node != {} and self.neo4j_helper.get_outgoing_edges(src=node) != None:
                 #TODO: it searching on all graph, improve that to just search on returned sub-graph
                 for edge in self.neo4j_helper.get_outgoing_edges(src=node):
                     #TODO: test the same_tx_id rule for each path
                     if not path:
-                        if edge.end_node not in visited:
-                            stack.append((edge.end_node, [edge]))
-                    elif edge.end_node not in visited and edge['tx_id'] == path[0]['tx_id']:
-                        stack.append((edge.end_node, path + [edge]))
+                        if edge['end_node'] not in visited:
+                            stack.append((edge['end_node'], [edge]))
+                    elif edge['end_node'] not in visited and edge['tx_id'] == path[0]['tx_id']:
+                        stack.append((edge['end_node'], path + [edge]))
             else:
                 paths.append(path)
         return paths
@@ -96,6 +96,7 @@ class SearchControler(metaclass=Singleton):
     def get_similarity_context(self, path):
         context = ''
         for edge in path:
+            print(edge['properties'])
             temp_context = json.loads(edge['properties'])
             context += temp_context['interpretation']
             #******************************** create context on the fly *******************************
