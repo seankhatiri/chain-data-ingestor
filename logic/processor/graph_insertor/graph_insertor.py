@@ -13,8 +13,7 @@ class GraphInsertor(Processor):
         nodes = self.data[tx_id]['nodes']
         edges = self.data[tx_id]['edges']
         for node in nodes:
-            self.neo4j_helper.insert_node(node) if not self.neo4j_helper.find_one_node(node['type'], node['address']) else \
-                self.neo4j_helper.update_node(node['type'], node['address'], node['detail'])
+            self.neo4j_helper.insert_node(node)
         for edge in edges:
             src = self.neo4j_helper.find_one_node(address=edge['src'])
             dest = self.neo4j_helper.find_one_node(address=edge['dest'])

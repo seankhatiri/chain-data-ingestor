@@ -20,6 +20,7 @@ class EdgeProcessor(Processor):
             if 'destination' in event:
                 if event['source'].lower() == self.data[tx_id]['from'] and event['destination'].lower() == self.data[tx_id]['to']: continue
             if 'destination' in event and 'meta' in event and 'contract' in event['meta']:
+                #TODO: we are missing two same edges (tokenTransfer) between two nodes (e31, 06)
                 if event['meta']['contract'] != event['source'] and event['meta']['contract'] != event['destination']:
                     self.edges.append(self._get_edges_kwargs(tx_hash, event['source'], 'tokenTransfer', event['meta']['contract']))
                     self.edges.append(self._get_edges_kwargs(tx_hash, event['meta']['contract'], 'tokenTransfer', event['destination']))
