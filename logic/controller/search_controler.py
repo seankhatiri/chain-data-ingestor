@@ -96,7 +96,6 @@ class SearchControler(metaclass=Singleton):
     def get_similarity_context(self, path):
         context = ''
         for edge in path:
-            print(edge['properties'])
             temp_context = json.loads(edge['properties'])
             context += temp_context['interpretation']
             #******************************** create context on the fly *******************************
