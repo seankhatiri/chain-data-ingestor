@@ -23,38 +23,40 @@ from configuration.configs import Configs
 def health_check():
     return 'healthy', 200
 
-def costumSerializable(sub_graph):
-    #Since we can't serialize neo2py Relationship objects, we implement a custom serializable here
-    simple_obj = []
-    for item in sub_graph:
-        nodes = item['nodes']
-        relationships = item['relationships']
-        paths = item['paths']
-        simple_paths = []
-        for path in paths:
-            simple_path = {}
-            simple_path['score'] = path['score']
-            simple_path['path'] = []
-            for rel in path['path']:
-                simple_rel = {}
-                simple_rel['label'] = rel.__class__.__name__
-                simple_rel['properties'] = rel['properties']
-                simple_rel['tx_id'] = rel['tx_id']
-                simple_rel['start_node'] = rel.start_node
-                simple_rel['end_node'] = rel.end_node
-                simple_path['path'].append(simple_rel)
-            simple_paths.append(simple_path)
-        simple_relationships = []
-        for rel in relationships:
-            simple_rel = {}
-            simple_rel['label'] = rel.__class__.__name__
-            simple_rel['properties'] = rel['properties']
-            simple_rel['tx_id'] = rel['tx_id']
-            simple_rel['start_node'] = rel.start_node
-            simple_rel['end_node'] = rel.end_node
-            simple_relationships.append(simple_rel)
-        simple_obj.append({'nodes': nodes, 'relationships': simple_relationships, 'paths': simple_paths})
-    return simple_obj
+# def costumSerializable(sub_graph):
+#     #Since we can't serialize neo2py Relationship objects, we implement a custom serializable here
+#     simple_obj = []
+#     for item in sub_graph:
+#         nodes = item['nodes']
+#         relationships = item['relationships']
+#         paths = item['paths']
+#         simple_paths = []
+#         for path in paths:
+#             simple_path = {}
+#             simple_path['score'] = path['score']
+#             simple_path['path'] = []
+#             for rel in path['path']:
+#                 rel = rel[0]
+#                 simple_rel = {}
+#                 simple_rel['label'] = rel.__class__.__name__
+#                 simple_rel['properties'] = rel['properties']
+#                 simple_rel['tx_id'] = rel['tx_id']
+#                 simple_rel['start_node'] = rel.start_node
+#                 simple_rel['end_node'] = rel.end_node
+#                 simple_path['path'].append(simple_rel)
+#             simple_paths.append(simple_path)
+#         simple_relationships = []
+#         for rel in relationships:
+#             simple_rel = {}
+#             rel=rel[0]
+#             simple_rel['label'] = rel.__class__.__name__
+#             simple_rel['properties'] = rel['properties']
+#             simple_rel['tx_id'] = rel['tx_id']
+#             simple_rel['start_node'] = rel.start_node
+#             simple_rel['end_node'] = rel.end_node
+#             simple_relationships.append(simple_rel)
+#         simple_obj.append({'nodes': nodes, 'relationships': simple_relationships, 'paths': simple_paths})
+#     return simple_obj
 
 @blueprint.route('/search', methods=['GET'])
 def search():
@@ -62,7 +64,8 @@ def search():
     hop = request.args.get('hop')
     if query and hop:
         result = SearchControler().search(query, hop)
-        return jsonify(result=costumSerializable(result))
+        # return jsonify(result=costumSerializable(result))
+        return jsonify(result)
     else:
         return "missed user query, add the query param in this way: ?query='the query string'&hop=int"
 
