@@ -9,4 +9,5 @@ kafka-docker/
 /myenv
 /utility/contract_parser/data
 /utility/contract_parser/solidity-universal-parser
+test.py
 
