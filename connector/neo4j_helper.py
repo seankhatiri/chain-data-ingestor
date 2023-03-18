@@ -25,19 +25,14 @@ class Neo4jHelper:
             Logger().info(message = 'constrains exist, pass...')
     
     def connect(self):
-        uri = "bolt://localhost:7687"
-        username = "neo4j"
-        password = "4314382hos"
-        driver = GraphDatabase.driver(uri, auth=(username, password))
+        driver = GraphDatabase.driver(self.url, auth=(self.username, self.password))
         self.graph = driver.session()
 
     def insert_node(self, node):
         if node['type'] == 'CONTRACT':
             node['detail']['SourceCode'] = node['detail']['SourceCode'].replace("'", '''/''')
-            # create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', ContractName: '{node['detail']['ContractName']}', SourceCode: '{node['detail']['SourceCode']}' }})"
-            # update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.ContractName = '{node['detail']['ContractName']}', n.SourceCode = '{node['detail']['SourceCode']}' RETURN n"
-            create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', ContractName: '{node['detail']['ContractName']}' }})"
-            update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.ContractName = '{node['detail']['ContractName']}' RETURN n"
+            create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', ContractName: '{node['detail']['ContractName']}', SourceCode: '{node['detail']['SourceCode']}' }})"
+            update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.ContractName = '{node['detail']['ContractName']}', n.SourceCode = '{node['detail']['SourceCode']}' RETURN n"
         else:
              create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', detail: '{node['detail']}' }})"
              update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.detail = '{node['detail']}' RETURN n"
