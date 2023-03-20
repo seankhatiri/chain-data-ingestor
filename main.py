@@ -3,8 +3,10 @@ from configuration.configs import Configs
 from flask_app import create_app, db
 from flask_app.base.models import User
 from utility.logger import Logger
+from flask_cors import CORS
 
 app = create_app(Configs)
+CORS(app)
 Migrate(app, db)
 
 
