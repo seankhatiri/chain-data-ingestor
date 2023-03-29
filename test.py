@@ -8,6 +8,8 @@ from utility.contract_parser.contract_parser import ContractParser
 from logic.adaptor.cmc_adaptor import CMCAdaptor
 import json
 import subprocess
+from logic.controller.recommender_controler import Recommender
+from logic.controller.recommender_controler import Item
 
 if __name__ == '__main__':
     '''
@@ -61,45 +63,56 @@ if __name__ == '__main__':
     # result = CMCAdaptor().fetch_token_info(token_name='bitcoin')
     # print(result)
 
-    node_dict1 = {
-      'type': 'CONTRACT',
-      'address': '1111',
-      'detail': {
-        'ContractName': 'ETH',
-        'SourceCode': 'code'
-      }
-    }
-    node_dict2 = {
-      'type': 'USER',
-      'address': '2222',
-      'detail': {}
-    }
+    # node_dict1 = {
+    #   'type': 'CONTRACT',
+    #   'address': '1111',
+    #   'detail': {
+    #     'ContractName': 'ETH',
+    #     'SourceCode': 'code'
+    #   }
+    # }
+    # node_dict2 = {
+    #   'type': 'USER',
+    #   'address': '2222',
+    #   'detail': {}
+    # }
 
-    neo4j_helper.insert_node(node_dict1)
-    neo4j_helper.insert_node(node_dict2)
-    src = neo4j_helper.find_one_node('CONTRACT', '1111')
-    dest = neo4j_helper.find_one_node('USER', '2222')
-    # neo4j_helper.insert_relationship(tx_id='id1', src=src, label='test_label', dest = dest, properties='empty')
-    properties = {
-      "interaction": {
-        "function_name": "multicall",
-        "function_signature": "multicall (uint256, bytes[])",
-        "function_args": {
-          "deadline": "1671397343",
-          "data": [
-            "0x472b43f3000000000000000000000000000000000000000000000000013fbe85edc90000000000000000000000000000000000000000000000000110b916fee1cdb225130000000000000000000000000000000000000000000000000000000000000080000000000000000000000000e3108157338a6038410d18a2d70f2fe579ca74140000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000062b1637f3b2de01d72258e83e5c49303e4212e3"
-          ]
-        }
-      },
-      "interpretation": "Address 0xe3108157338a6038410d18a2d70f2fe579ca7414 called multicall (uint256, bytes[]) of contract 0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45 with these arguments: {'deadline': '1671397343', 'data': ['0x472b43f3000000000000000000000000000000000000000000000000013fbe85edc90000000000000000000000000000000000000000000000000110b916fee1cdb225130000000000000000000000000000000000000000000000000000000000000080000000000000000000000000e3108157338a6038410d18a2d70f2fe579ca74140000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000062b1637f3b2de01d72258e83e5c49303e4212e3']}"
-    }
+    # neo4j_helper.insert_node(node_dict1)
+    # neo4j_helper.insert_node(node_dict2)
+    # src = neo4j_helper.find_one_node('CONTRACT', '1111')
+    # dest = neo4j_helper.find_one_node('USER', '2222')
+    # # neo4j_helper.insert_relationship(tx_id='id1', src=src, label='test_label', dest = dest, properties='empty')
+    # properties = {
+    #   "interaction": {
+    #     "function_name": "multicall",
+    #     "function_signature": "multicall (uint256, bytes[])",
+    #     "function_args": {
+    #       "deadline": "1671397343",
+    #       "data": [
+    #         "0x472b43f3000000000000000000000000000000000000000000000000013fbe85edc90000000000000000000000000000000000000000000000000110b916fee1cdb225130000000000000000000000000000000000000000000000000000000000000080000000000000000000000000e3108157338a6038410d18a2d70f2fe579ca74140000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000062b1637f3b2de01d72258e83e5c49303e4212e3"
+    #       ]
+    #     }
+    #   },
+    #   "interpretation": "Address 0xe3108157338a6038410d18a2d70f2fe579ca7414 called multicall (uint256, bytes[]) of contract 0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45 with these arguments: {'deadline': '1671397343', 'data': ['0x472b43f3000000000000000000000000000000000000000000000000013fbe85edc90000000000000000000000000000000000000000000000000110b916fee1cdb225130000000000000000000000000000000000000000000000000000000000000080000000000000000000000000e3108157338a6038410d18a2d70f2fe579ca74140000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000062b1637f3b2de01d72258e83e5c49303e4212e3']}"
+    # }
 
-    properties = json.dumps(properties).replace("'", '''/''')
-    result = json.loads(properties)
-    print(result['interpretation'])
+    # properties = json.dumps(properties).replace("'", '''/''')
+    # result = json.loads(properties)
+    # print(result['interpretation'])
     # neo4j_helper.insert_relationship(tx_id='id2', src=src, label='test_label', dest = dest, properties=properties)
 
+    items = [
+      Item("Item 1", "This is the description of item 1."),
+      Item("Item 2", "This is the description of item 2."),
+      Item("Item 3", "This is the description of item 3."),
+    ]
 
+    context = "I'm looking for something similar to item 1."
+
+    recommender = Recommender()
+    ranked_items = recommender.rank_items(items, context)
+
+    print(ranked_items)
 
 
 

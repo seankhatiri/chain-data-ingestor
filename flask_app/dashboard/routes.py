@@ -7,7 +7,6 @@ from flask import render_template, request, url_for, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 
-
 from flask_app.dashboard import blueprint
 from flask_app.dashboard.forms import RetryForm, UploadForm, FailurePipelineForm, MainPipelineForm, ProcessorsForm
 from logic.controller.construct_graph_controler import ConstructGraphControler
@@ -15,6 +14,7 @@ from logic.pipeline.dynamic_pipeline.dynamic_pipeline import DynamicPipeline
 from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
 from logic.controller.search_controler import SearchControler
+from logic.controller.adsrecommender_controler import AdsRecommender
 from utility.logger import Logger 
 from connector.neo4j_helper import Neo4jHelper
 from configuration.configs import Configs
@@ -32,6 +32,15 @@ def search():
         return jsonify(result)
     else:
         return "missed user query, add the query param in this way: ?query='the query string'&hop=int"
+
+@blueprint.route('/ads', methods=['GET'])
+def ads_recommender():
+    address = request.args.get('address')
+    if address:
+        result = AdsRecommender().rank_ads(address)
+        return jsonify(result)
+    else:
+        return "missed user address, add the query param in this way: ?address='user_address'"
 
 @blueprint.route('/test', methods=['GET'])
 def test():
