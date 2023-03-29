@@ -3,9 +3,11 @@ from utility.singleton import Singleton
 from configuration.configs import Configs
 from connector.mongo_helper import MongoHelper
 from connector.neo4j_helper import Neo4jHelper
+from flask import current_app, g
 import nltk
 import torch
 from transformers import AutoTokenizer, AutoModel, AutoModelForSequenceClassification
+import pickle
 
 class SearchControler(metaclass=Singleton):
     debug: bool
@@ -82,11 +84,11 @@ class SearchControler(metaclass=Singleton):
             if self.neo4j_helper.find_node_by_attribute(attribute=entity): nodes.append(self.neo4j_helper.find_node_by_attribute(attribute=entity))
         return nodes
 
-    def calculate_similarity_score(self, query, path):
+    def calculate_similarity_score(self, query, path=None, recommender=False, context=None):
         if self.model is None:
             self.load_model()
         with torch.no_grad():
-            context = self.get_similarity_context(path)
+            context = context if recommender else self.get_similarity_context(path)
             inputs = self.tokenizer.encode_plus(query, context, return_tensors='pt', padding=True)
             outputs = self.model(**inputs)
             logits = outputs.logits
@@ -113,9 +115,10 @@ class SearchControler(metaclass=Singleton):
         return context
 
     def load_model(self):
-        model_name = 'sentence-transformers/paraphrase-distilroberta-base-v1'
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        model_data = g.redis.get("model")
+        tokenizer_data = g.redis.get("tokenizer")
+        self.model = pickle.loads(model_data)
+        self.tokenizer = pickle.loads(tokenizer_data)
         self.model.eval()
 
     # ***************** Advance Graph Traversal **************************
