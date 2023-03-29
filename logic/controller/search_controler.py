@@ -3,11 +3,11 @@ from utility.singleton import Singleton
 from configuration.configs import Configs
 from connector.mongo_helper import MongoHelper
 from connector.neo4j_helper import Neo4jHelper
-from flask import current_app, g
 import nltk
 import torch
 from transformers import AutoTokenizer, AutoModel, AutoModelForSequenceClassification
 import pickle
+import redis
 
 class SearchControler(metaclass=Singleton):
     debug: bool
@@ -21,6 +21,7 @@ class SearchControler(metaclass=Singleton):
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
         self.tokenizer = None
         self.model = None
+        self.r = redis.Redis(host='localhost', port=6379, db=0)
         # nltk.download('punkt')
         # nltk.download('averaged_perceptron_tagger')
 
@@ -115,8 +116,8 @@ class SearchControler(metaclass=Singleton):
         return context
 
     def load_model(self):
-        model_data = g.redis.get("model")
-        tokenizer_data = g.redis.get("tokenizer")
+        model_data = self.r.get("model")
+        tokenizer_data = self.r.get("tokenizer")
         self.model = pickle.loads(model_data)
         self.tokenizer = pickle.loads(tokenizer_data)
         self.model.eval()
