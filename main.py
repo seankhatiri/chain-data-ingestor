@@ -5,17 +5,11 @@ from flask_app.base.models import User
 from utility.logger import Logger
 from flask_cors import CORS
 import pickle
-from flask import Flask, request, jsonify, g
 import requests
-import redis
 
 app = create_app(Configs)
 CORS(app)
 Migrate(app, db)
-
-@app.before_first_request
-def load_redis():
-    g.redis = redis.Redis(host='localhost', port=6379, db=0)
 
 @app.before_first_request
 def set_admin_user():
