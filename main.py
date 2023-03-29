@@ -13,23 +13,6 @@ app = create_app(Configs)
 CORS(app)
 Migrate(app, db)
 
-# ******************************* Load model sent over HTTP **************************
-# import base64
-# def get_model_and_tokenizer():
-#     response = requests.get(MODEL_SERVER_URL)
-#     model_data = base64.b64decode(response.json()['model'].encode("utf-8"))
-#     tokenizer_data = base64.b64decode(response.json()['tokenizer'].encode("utf-8"))
-#     model = pickle.loads(model_data)
-#     tokenizer = pickle.loads(tokenizer_data)
-#     return model, tokenizer
-
-# def load_model_and_tokenizer():
-#     model_data = r.get("model")
-#     tokenizer_data = r.get("tokenizer")
-#     model = pickle.loads(model_data)
-#     tokenizer = pickle.loads(tokenizer_data)
-#     return model, tokenizer
-
 @app.before_first_request
 def load_redis():
     g.redis = redis.Redis(host='localhost', port=6379, db=0)
