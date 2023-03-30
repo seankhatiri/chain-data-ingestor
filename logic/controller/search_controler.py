@@ -30,6 +30,7 @@ class SearchControler(metaclass=Singleton):
         path_scores = []
         seed_entities = self.seed_entity_finder(query)
         seed_nodes = self.find_seed_nodes(seed_entities)
+        print(seed_nodes)
         for seed_node in seed_nodes:
             sub_graph = self.neo4j_helper.get_subgraph(seed_node['address'], max_hop=hop)
             paths = self.simple_graph_traversal(seed_node, max_hop=hop)
@@ -80,16 +81,37 @@ class SearchControler(metaclass=Singleton):
     
     def find_seed_nodes(self, entities):
         nodes = []
+        #TODO: one problem here is sometimes, users don't add any user/contract address, just some general description (like marketer general search in landingpage)
         for entity in entities:
             if self.neo4j_helper.find_one_node(address=entity): nodes.append(self.neo4j_helper.find_one_node(address=entity))
-            if self.neo4j_helper.find_node_by_attribute(attribute=entity): nodes.append(self.neo4j_helper.find_node_by_attribute(attribute=entity))
+        
+        def create_context(user_node):
+            paths = self.simple_graph_traversal(user_node, max_hop=1)
+            context = ''
+            for path in paths:
+                context += self.get_similarity_context(path)
+            return context
+
+        def entities_to_node(entities):
+            # First get all user nodes, then for each user_node create context, then call the calculate_similarity, keep the max score, return the node if not in nodes
+            user_nodes = self.neo4j_helper.get_all_nodes(type='USER')
+            result = {'node': '', 'score': 0}
+            for user_node in user_nodes:
+                context = create_context(user_node)
+                # print(context)
+                score = self.calculate_similarity_score(query = ' '.join(entities), context = context) if context else 0
+                if score > result['score']: result['node'] = user_node
+            return result['node']
+
+        node = entities_to_node(entities)
+        if node not in nodes: nodes.append(node)
         return nodes
 
     def calculate_similarity_score(self, query, path=None, recommender=False, context=None):
         if self.model is None:
             self.load_model()
         with torch.no_grad():
-            context = context if recommender else self.get_similarity_context(path)
+            context = context if context else self.get_similarity_context(path)
             inputs = self.tokenizer.encode_plus(query, context, return_tensors='pt', padding=True)
             outputs = self.model(**inputs)
             logits = outputs.logits
