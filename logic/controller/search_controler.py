@@ -30,7 +30,6 @@ class SearchControler(metaclass=Singleton):
         path_scores = []
         seed_entities = self.seed_entity_finder(query)
         seed_nodes = self.find_seed_nodes(seed_entities)
-        print(seed_nodes)
         for seed_node in seed_nodes:
             sub_graph = self.neo4j_helper.get_subgraph(seed_node['address'], max_hop=hop)
             paths = self.simple_graph_traversal(seed_node, max_hop=hop)

@@ -15,12 +15,30 @@ from flask_app.base import blueprint
 from flask_app.base.forms import LoginForm, CreateAccountForm
 from flask_app.base.models import User
 from flask_app.base.util import verify_pass
+from flask import jsonify
 
 
 @blueprint.route('/')
 def route_default():
     return redirect(url_for('base_blueprint.login'))
 
+@blueprint.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    username = data["username"]
+    password = data["password"]
+
+    # Check if the user already exists
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        return jsonify({"error": "User already exists"}), 409
+
+    # Create a new user and add it to the database
+    new_user = User(username=username, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"message": "User created successfully"}), 201
 
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login():
@@ -53,10 +71,10 @@ def login():
 #     login_form = LoginForm(request.form)
 #     create_account_form = CreateAccountForm(request.form)
 #     if 'register' in request.form:
-#
+
 #         username = request.form['username']
 #         email = request.form['email']
-#
+
 #         # Check username exists
 #         user = User.query.filter_by(username=username).first()
 #         if user:
@@ -64,7 +82,7 @@ def login():
 #                                    msg='Username already registered',
 #                                    success=False,
 #                                    form=create_account_form)
-#
+
 #         # Check email exists
 #         user = User.query.filter_by(email=email).first()
 #         if user:
@@ -72,17 +90,17 @@ def login():
 #                                    msg='Email already registered',
 #                                    success=False,
 #                                    form=create_account_form)
-#
+
 #         # else we can create the user
 #         user = User(**request.form)
 #         db.session.add(user)
 #         db.session.commit()
-#
+
 #         return render_template('accounts/register.html',
 #                                msg='User created please <a href="/login">login</a>',
 #                                success=True,
 #                                form=create_account_form)
-#
+
 #     else:
 #         return render_template('accounts/register.html', form=create_account_form)
 
