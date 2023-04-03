@@ -6,10 +6,11 @@ from utility.logger import Logger
 from flask_cors import CORS
 import pickle
 import requests
+from middleware import CORSMiddleware
 
 app = create_app(Configs)
-# Allow all domains to access your API
-CORS(app, resources={r'*': {'origins': '*'}})
+# Use the custom CORS middleware
+app.wsgi_app = CORSMiddleware(app.wsgi_app)
 Migrate(app, db)
 
 @app.before_first_request
