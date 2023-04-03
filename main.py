@@ -8,7 +8,8 @@ import pickle
 import requests
 
 app = create_app(Configs)
-CORS(app)
+# Allow all domains to access your API
+CORS(app, resources={r'*': {'origins': '*'}})
 Migrate(app, db)
 
 @app.before_first_request
