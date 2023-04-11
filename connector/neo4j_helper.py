@@ -30,8 +30,8 @@ class Neo4jHelper:
     def insert_node(self, node):
         if node['type'] == 'CONTRACT':
             node['detail']['SourceCode'] = node['detail']['SourceCode'].replace("'", '''/''')
-            create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', ContractName: '{node['detail']['ContractName']}' }})"
-            update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.ContractName = '{node['detail']['ContractName']}' RETURN n"
+            create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', ContractName: '{node['detail']['ContractName']}', SourceCode: '{node['detail']['SourceCode']}' }})"
+            update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.ContractName = '{node['detail']['ContractName']}', n.SourceCode = '{node['detail']['SourceCode']}' RETURN n"
         else:
              create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', detail: '{node['detail']}' }})"
              update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.detail = '{node['detail']}' RETURN n"

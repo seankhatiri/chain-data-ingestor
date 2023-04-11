@@ -50,7 +50,6 @@ class NodeProcessor(Processor):
 
     def _get_node_detail_kwargs(self, node):
         if self._extract_token_names(node['ContractName']):
-            token = {}
             token['name'] = node['ContractName']
             token['description'] = self._get_token_context(node['ContractName'])
         else:
