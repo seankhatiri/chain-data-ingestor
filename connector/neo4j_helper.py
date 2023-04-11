@@ -14,19 +14,18 @@ class Neo4jHelper:
         self.username = username
         self.password = password
         self.connect()
-        self.add_constraints()
+        self.add_constraints() 
     
     def add_constraints(self):
         try:
-            self.graph.run("CREATE CONSTRAINT FOR (u:CONTRACT) REQUIRE u.address IS UNIQUE")
-            self.graph.run("CREATE CONSTRAINT FOR (u:USER) REQUIRE u.address IS UNIQUE")
+            self._query_graph("CREATE CONSTRAINT FOR (u:CONTRACT) REQUIRE u.address IS UNIQUE")
+            self._query_graph("CREATE CONSTRAINT FOR (u:USER) REQUIRE u.address IS UNIQUE")
             Logger().info(message = 'constrains has been added')
         except Exception as e:
             Logger().info(message = 'constrains exist, pass...')
     
     def connect(self):
-        driver = GraphDatabase.driver(self.url, auth=(self.username, self.password))
-        self.graph = driver.session()
+        self.driver = GraphDatabase.driver(self.url, auth=(self.username, self.password))
 
     def insert_node(self, node):
         if node['type'] == 'CONTRACT':
@@ -37,11 +36,11 @@ class Neo4jHelper:
              create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', detail: '{node['detail']}' }})"
              update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.detail = '{node['detail']}' RETURN n"
         if not self.find_one_node(type = node['type'], address = node['address'].lower()):
-            result = self.graph.run(create_query)
+            result = self._query_graph(create_query)
             Logger().info(message='node has been created')
             return result
         else:
-            result = self.graph.run(update_query)
+            result = self._query_graph(update_query)
             Logger().info(message='node has been updated')
             return result
     
@@ -50,40 +49,45 @@ class Neo4jHelper:
         create_query = f"MATCH (src {{address: '{src['address']}'}}), (dest {{address: '{dest['address']}'}}) CREATE (src)-[r:{label} {{tx_id:'{tx_id}', properties:'{properties}'}}]->(dest) RETURN r"
         update_query = f"MATCH (src {{address: '{src['address']}'}})-[r:{label}]->(dest {{address: '{dest['address']}'}}) WHERE r.tx_id = '{tx_id}' SET r.properties = '{properties}' RETURN r"
         if not self.find_one_relationship(tx_id, src, label, dest):
-            result = self.graph.run(create_query)
+            result = self._query_graph(create_query)
             Logger().info(message='edge has been created')
             return result
         else:
-            result = self.graph.run(update_query)
+            result = self._query_graph(update_query)
             Logger().info(message ='edge has been updated')
             return result
 
     def find_one_node(self, type=None, address=None):
         type = self._find_node_type(address) if not type else type
         query = f"MATCH (n:{type} {{address: '{address}'}}) RETURN n"
-        result = self.graph.run(query).data()
+        result, data = self._query_graph(query)
+        result = data
         return result[0]["n"] if result else None
     
     def find_node_by_attribute(self, attribute):
         query = f"MATCH (n) WHERE n.ContractName = '{attribute}' RETURN n"
-        result = self.graph.run(query).data()
+        result, data = self._query_graph(query)
+        result = data
         return result[0]["n"] if result else None
     
     def find_one_relationship(self, tx_id, src, label: str, dest):
         #TODO: add the tx_id to find an edge too
         query = f"MATCH (a)-[r:{label}]->(b) WHERE a.address = '{src['address']}' AND b.address = '{dest['address']}' AND r.tx_id = '{tx_id}' RETURN r"
-        result = self.graph.run(query).data()
+        result, data = self._query_graph(query).data()
+        result = data
         return result[0]["r"] if result else None
 
     def get_all_nodes(self, type=None):
         query = f"MATCH (n:{type}) RETURN n" if type else "MATCH (n) RETURN n"
-        results = self.graph.run(query).data()
+        results, data = self._query_graph(query)
+        result = data
         return [result["n"] for result in results]
 
     def get_relationships(self, src , dest):
         #TODO: add the tx_id to get all relationships in the context of a tx
         query = f"MATCH (a)-[r]->(b) WHERE a.address = '{src['address']}' AND b.address = '{dest['address']}' RETURN r"
-        result = self.graph.run(query).data()
+        result, data = self._query_graph(query)
+        result = data
         relationships = []
         if result: 
             for i in range(len(result)):
@@ -94,17 +98,17 @@ class Neo4jHelper:
     
     def drop_collection(self, label: str):
         try:
-            self.graph.run(f"DROP LABEL {label}")
+            self._query_graph(f"DROP LABEL {label}")
         except Exception as e:
             Logger().error(str(e), title='drop label', additional_data=label)
 
     def delete_node(self, type: str, property_key: str, property_value: str):
         # TODO: to delete a node first we need to delete it's relationships
-        self.graph.run(f"MATCH (n:{type} {{ {property_key}: '{property_value}' }})\nDELETE n")
+        self._query_graph(f"MATCH (n:{type} {{ {property_key}: '{property_value}' }})\nDELETE n")
         
     def delete_relationship(self, src, label: str, dest):
         query = f"MATCH (a)-[r:{label}]->(b) WHERE a.address = '{src['address']}' AND b.address = '{dest['address']}' DELETE r"
-        self.graph.run(query)
+        self._query_graph(query)
 
     def update_node(self, type, address, data):
         node = self.find_one_node(type, address)
@@ -134,7 +138,8 @@ class Neo4jHelper:
 
     def get_outgoing_edges(self, src, sub_graph = None):
         query = f"MATCH (src)-[r]->(dest) WHERE src.address = '{src['address']}' RETURN r,r.tx_id,r.properties,src,dest"
-        result = self.graph.run(query).data()
+        result, data = self._query_graph(query)
+        result = data
         edges = []
         for record in result:
             edge = record['r']
@@ -151,14 +156,15 @@ class Neo4jHelper:
 
     def _find_node_type(self, address):
         node_type_query = f"MATCH (n) WHERE n.address = '{address}' RETURN labels(n) AS node_type"
-        result = self.graph.run(node_type_query).data()
-        return result[0]['node_type'][0] if result else None
+        result,data = self._query_graph(node_type_query)
+        return data[0]['node_type'][0] if data else None
         
     def get_subgraph(self, address, max_hop=1):
         #TODO: it should return Graph obj to be used in get_outgoing_edges method
         # return 'nodes': [Node(type, address, detail), ...], 'relationshsips': [edge_label(src_node, dest_node), ...]
         query = f"MATCH (n) WHERE n.address = '{address}' CALL apoc.path.subgraphAll(n, {{maxLevel: {max_hop}}}) YIELD nodes, relationships RETURN nodes, relationships"
-        result = self.graph.run(query).data()[0]
+        result,data = self._query_graph(query)
+        result = data[0]
         relationships = []
         for relationship in result['relationships']:
             temp = {}
@@ -171,3 +177,9 @@ class Neo4jHelper:
 
     def get_relationship_attributes(self, relationship):
         pass
+
+    def _query_graph(self, query):
+        with self.driver.session() as session:
+            result = session.run(query)
+            data = session.run(query).data()
+        return result, data
