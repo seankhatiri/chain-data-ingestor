@@ -6,8 +6,6 @@ Copyright (c) 2019 - present AppSeed.us
 from flask import render_template, request, url_for, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
-from functools import wraps
-from flask_login import current_user
 
 from flask_app.dashboard import blueprint
 from flask_app.dashboard.forms import RetryForm, UploadForm, FailurePipelineForm, MainPipelineForm, ProcessorsForm
@@ -17,18 +15,9 @@ from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
 from logic.controller.search_controler import SearchControler
 from logic.controller.adsrecommender_controler import AdsRecommender
-from logic.controller.recommender_controler import RecommenderControler
 from utility.logger import Logger 
 from connector.neo4j_helper import Neo4jHelper
 from configuration.configs import Configs
-
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
-            return jsonify({"error": "Unauthorized access"}), 403
-        return f(*args, **kwargs)
-    return decorated_function
 
 @blueprint.route("/health-check")
 def health_check():
@@ -52,18 +41,6 @@ def ads_recommender():
         return jsonify(result)
     else:
         return "missed user address, add the query param in this way: ?address='user_address'"
-
-@blueprint.route('/recommender', methods=['POST'])
-#TODO: @login_required After implement the sign up and admin method, uncomment this
-def recommender():
-    data = request.get_json()
-    items = data["items"]
-    address = data["address"]
-    if address:
-        result = RecommenderControler().rank_contents(address, items)
-        return jsonify({"ranked_items": result})
-    else:
-        return "missed user address or items, see the documentations"
 
 @blueprint.route('/test', methods=['GET'])
 def test():
