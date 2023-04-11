@@ -43,8 +43,6 @@ class EdgeProcessor(Processor):
         return detail
 
     def _get_edges_kwargs(self, tx_hash, src, label, dest, detail=None):
-        #TODO: handel custom edge labels where we don't have func_name in tx
-        if label == '': label = 'hadInteraction'
         return {
                     'src': src.lower(),
                     'label': label,
