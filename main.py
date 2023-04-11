@@ -17,7 +17,7 @@ Migrate(app, db)
 def set_admin_user():
     user = User.query.filter_by(username='socialBlock').first()
     if not user:
-        user = User(username='socialBlock', email='socialblock@gmail.com', password='admin@socialblock2023')
+        user = User(username='socialBlock', password='admin@socialblock2023', is_admin= True)
         db.session.add(user)
         db.session.commit()
 
