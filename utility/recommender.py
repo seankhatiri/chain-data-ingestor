@@ -14,6 +14,17 @@ class Recommender:
         self.model = None
         self.search_controler = SearchControler()
 
+    #TODO: Uncomment when start working on feature/recommender
+    #  def _extract_context(self, subgraph):
+    #      contexts = []
+    #      for path in subgraph['paths']:
+    #          for edge in path['path']:
+    #              properties = json.loads(edge['properties'])
+    #              interpretation = properties['interpretation']
+    #              contexts.append(interpretation)
+    #      final_context = " ".join(contexts)
+    #      return final_context
+
     def rank_items(self, items: List[Item], context: str) -> List[Tuple[str, float]]:
         item_similarities = []
         for item in items:

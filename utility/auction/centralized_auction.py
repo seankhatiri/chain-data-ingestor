@@ -1,9 +1,11 @@
+from logic.controller.adsrecommender_controller import AdsRecommender
 from connector.mongo_helper import MongoHelper
-from recommender import Recommender
+from configuration.configs import Configs
 
 class CentralizedAuction:
     def __init__(self):
-        self.recommender = Recommender()
+        self.ads_recommender = AdsRecommender()
+        self.mongo_helper = MongoHelper(Configs.mongo_url_cloud)
         
     def calculate_age_factor(self, days_since_launch):
         return 1 / (1 + days_since_launch)
@@ -21,33 +23,18 @@ class CentralizedAuction:
         #TODO: Implement function to update ad impression after each winning status
         
     def fetch_ads(self, fixed_criteria):
-        #TODO: Implement function to retrieve ads based on fixed criteria, now it retrieves all ads
-
+        #TODO: Implement function to retrieve ads based on fixed criteria here, now it retrieves all ads inside adsrecommender_controller
         
-    def get_highest_score_ad(self, ads_list):
-        max_score = 0
-        highest_score_ad = None
+    def get_highest_score_ad(self, pk):
+        ranked_ads = self.ads_recommender.rank_ads(pk)
+        #TODO: Calculate ads_impression, quality_score ,and overall_score,
+        # for ad in ranked_ads:
+            # age_factor = self.calculate_age_factor(ad['days_since_launch'])
+            # ads_impression = self.calculate_ads_impression(ad['clicks'], ad['impressions'], age_factor)
+            # quality_score = self.calculate_quality_score(ads_similarity, ads_impression)
+            # overall_score = self.calculate_overall_score(quality_score, ad['budget']/ad['timeRemaining'])
         
-        for ad in ads_list:
-            # Calculate ads_similarity using the recommender
-            ads_similarity = self.recommender.get_ads_similarity(ad, fixed_criteria)
-            
-            # Calculate ads_impression
-            age_factor = self.calculate_age_factor(ad['days_since_launch'])
-            ads_impression = self.calculate_ads_impression(ad['clicks'], ad['impressions'], age_factor)
-            
-            # Calculate quality_score and overall_score
-            quality_score = self.calculate_quality_score(ads_similarity, ads_impression)
-            overall_score = self.calculate_overall_score(quality_score, ad['max_bid'])
-            
-            # Update highest_score_ad if overall_score is higher than max_score
-            if overall_score > max_score:
-                max_score = overall_score
-                highest_score_ad = ad
-                
-        return highest_score_ad
+        return self.mongo_helper.find_one('campaigns', {'description': ranked_ads[0]['description']})
+        
 
-# Initialize the CentralizedAuction class
-auction = CentralizedAuction()
 
-# Add code to interact with the auction system, e.g., create accounts, campaigns, fetch ads, etc.
