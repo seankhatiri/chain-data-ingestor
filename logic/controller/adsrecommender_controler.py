@@ -17,17 +17,6 @@ class AdsRecommender(Recommender):
         self.mongo_helper = MongoHelper(Configs.mongo_url_cloud)
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
 
-    #TODO: delete below when start working on feature/recommender, migrated to the base recommender class
-    def _extract_context(self, subgraph):
-        contexts = []
-        for path in subgraph['paths']:
-            for edge in path['path']:
-                properties = json.loads(edge['properties'])
-                interpretation = properties['interpretation']
-                contexts.append(interpretation)
-        final_context = " ".join(contexts)
-        return final_context
-
     def _get_ads(self):
         campaigns = self.mongo_helper.get_all('campaigns')
         for campaign in campaigns:

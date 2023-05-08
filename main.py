@@ -23,6 +23,6 @@ def set_admin_user():
 
 
 if __name__ == "__main__":
-    debug = False
+    debug = True
     Logger().info('App is started!')
     app.run(host='0.0.0.0', port=Configs.port, debug=debug, load_dotenv=True, use_reloader=debug, use_debugger=debug) 
