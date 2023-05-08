@@ -1,4 +1,4 @@
-from logic.controller.adsrecommender_controller import AdsRecommender
+from logic.controller.adsrecommender_controler import AdsRecommender
 from connector.mongo_helper import MongoHelper
 from configuration.configs import Configs
 
@@ -21,9 +21,11 @@ class CentralizedAuction:
         
     def update_ad_impression(self, ad_id, winning_status):
         #TODO: Implement function to update ad impression after each winning status
+        pass
         
     def fetch_ads(self, fixed_criteria):
         #TODO: Implement function to retrieve ads based on fixed criteria here, now it retrieves all ads inside adsrecommender_controller
+        pass
         
     def get_highest_score_ad(self, pk):
         ranked_ads = self.ads_recommender.rank_ads(pk)
@@ -34,7 +36,7 @@ class CentralizedAuction:
             # quality_score = self.calculate_quality_score(ads_similarity, ads_impression)
             # overall_score = self.calculate_overall_score(quality_score, ad['budget']/ad['timeRemaining'])
         
-        return self.mongo_helper.find_one('campaigns', {'description': ranked_ads[0]['description']})
+        return self.mongo_helper.find_one('campaigns', {'description': ranked_ads[0][1]})
         
 
 

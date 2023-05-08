@@ -32,5 +32,5 @@ class Recommender:
             similarity_score = self.search_controler.calculate_similarity_score( query = temp_item, context = context, recommender = True)
             item_similarities.append((item.name, item.description, similarity_score))
 
-        item_similarities.sort(key=lambda x: x[1], reverse=True)
+        item_similarities.sort(key=lambda x: x[1], reverse=False)
         return item_similarities

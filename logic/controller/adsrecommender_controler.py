@@ -14,9 +14,10 @@ class AdsRecommender(Recommender):
     def __init__(self):
         super().__init__()
         self.ads = []
-        self.mongo_helper = MongoHelper(Configs.mongo_url)
+        self.mongo_helper = MongoHelper(Configs.mongo_url_cloud)
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
 
+    #TODO: delete below when start working on feature/recommender, migrated to the base recommender class
     def _extract_context(self, subgraph):
         contexts = []
         for path in subgraph['paths']:
@@ -34,8 +35,7 @@ class AdsRecommender(Recommender):
 
 
     def rank_ads(self, address) -> List[Tuple[str, float]]:
-        search_controler = SearchControler()
-        subgraph = search_controler.search(address, hop=10)
+        subgraph = SearchControler().search(address, hop=10)
         final_context = self._extract_context(subgraph[0])
         self._get_ads()
         ranked_ads = self.rank_items(self.ads, final_context)
