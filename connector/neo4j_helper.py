@@ -30,8 +30,8 @@ class Neo4jHelper:
     def insert_node(self, node):
         if node['type'] == 'CONTRACT':
             node['detail']['SourceCode'] = node['detail']['SourceCode'].replace("'", '''/''')
-            create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', ContractName: '{node['detail']['ContractName']}', SourceCode: '{node['detail']['SourceCode']}' }})"
-            update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.ContractName = '{node['detail']['ContractName']}', n.SourceCode = '{node['detail']['SourceCode']}' RETURN n"
+            create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', ContractName: '{node['detail']['ContractName']}' }})"
+            update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.ContractName = '{node['detail']['ContractName']}' RETURN n"
         else:
              create_query = f"CREATE (n:{node['type']} {{address: '{node['address'].lower()}', detail: '{node['detail']}' }})"
              update_query = f"MATCH (n {{address: '{node['address'].lower()}'}}) SET n.detail = '{node['detail']}' RETURN n"
@@ -73,7 +73,7 @@ class Neo4jHelper:
     def find_one_relationship(self, tx_id, src, label: str, dest):
         #TODO: add the tx_id to find an edge too
         query = f"MATCH (a)-[r:{label}]->(b) WHERE a.address = '{src['address']}' AND b.address = '{dest['address']}' AND r.tx_id = '{tx_id}' RETURN r"
-        result, data = self._query_graph(query).data()
+        result, data = self._query_graph(query)
         result = data
         return result[0]["r"] if result else None
 
@@ -180,6 +180,9 @@ class Neo4jHelper:
 
     def _query_graph(self, query):
         with self.driver.session() as session:
-            result = session.run(query)
-            data = session.run(query).data()
-        return result, data
+            try:
+                result = session.run(query)
+                data = session.run(query).data()
+                return result, data
+            except Exception as e:
+                Logger().info(message = 'node/edge exists, pass ...')

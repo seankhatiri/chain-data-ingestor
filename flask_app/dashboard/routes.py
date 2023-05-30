@@ -2,7 +2,7 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-
+import base64
 from flask import render_template, request, url_for, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
@@ -15,6 +15,8 @@ from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
 from logic.controller.search_controler import SearchControler
 from logic.controller.adsrecommender_controler import AdsRecommender
+from utility.auction.centralized_auction import CentralizedAuction
+from logic.controller.recommender_controler import RecommenderControler
 from utility.logger import Logger 
 from connector.neo4j_helper import Neo4jHelper
 from configuration.configs import Configs
@@ -37,10 +39,22 @@ def search():
 def ads_recommender():
     address = request.args.get('address')
     if address:
-        result = AdsRecommender().rank_ads(address)
-        return jsonify(result)
+        result = CentralizedAuction().get_highest_score_ad(address) 
+        return result['media']
     else:
         return "missed user address, add the query param in this way: ?address='user_address'"
+
+
+@blueprint.route('/recommender', methods=['POST'])
+def recommender():
+    data = request.get_json()
+    items = data["items"]
+    address = data["address"]
+    if address:
+        result = RecommenderControler().rank_contents(address, items)
+        return jsonify({"ranked_items": result})
+    else:
+        return "missed user address or items, see the documentations"
 
 @blueprint.route('/test', methods=['GET'])
 def test():
