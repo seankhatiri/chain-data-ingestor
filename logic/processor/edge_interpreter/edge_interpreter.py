@@ -28,11 +28,11 @@ class EdgeInterpreter(Processor):
             func_description = ''
             contract_description = ''
             #TODO: handel the situation we have multiple func_name equal to edge['interaction']['function_name']
-            for class_ in contract['classes']:
-                for func in class_['funcs']:
-                    if edge['interaction']['function_name'] == func['func_name']:
-                        func_description = func['func_documentation']
-                contract_description = class_['class_documentation']
+            # for class_ in contract['classes']:
+            #     for func in class_['funcs']:
+            #         if edge['interaction']['function_name'] == func['func_name']:
+            #             func_description = func['func_documentation']
+            #     contract_description = class_['class_documentation']
             # explanation = self._get_explanation(contract_description, edge['interaction']['function_name'], edge['interaction']['function_args'], func_description)
             # context += f', or simply {explanation}'
         return context

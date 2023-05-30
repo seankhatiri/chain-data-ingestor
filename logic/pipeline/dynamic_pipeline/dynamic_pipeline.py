@@ -17,7 +17,7 @@ class DynamicPipeline(Pipeline):
     def __init__(self, selected_processors, txs_ids=None):
         self.selected_processors = selected_processors
         self.txs_ids = txs_ids
-        self.mongo_helper = MongoHelper(Configs.mongo_url)
+        self.mongo_helper = MongoHelper(Configs.mongo_url_cloud)
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
         self.data_adaptor = DBAdaptor(self.mongo_helper, self.neo4j_helper, txs_ids)
         self.processors = self.get_processors(self.mongo_helper, self.neo4j_helper)

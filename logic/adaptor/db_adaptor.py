@@ -19,7 +19,7 @@ class DBAdaptor(Adaptor):
                 result.append(self.mongo_helper.find_one('transactions', {'id': tx_id}))
             return result
         else:   
-            return self.mongo_helper.get_all('transactions', limit=2000)
+            return self.mongo_helper.get_all('transactions', limit=500)
 
     def fetch_contracts(self):
         return self.mongo_helper.get_all('contracts')
