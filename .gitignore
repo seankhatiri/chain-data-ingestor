@@ -11,3 +11,4 @@ kafka-docker/
 /utility/contract_parser/solidity-universal-parser
 test.py
 node_modules
+todo.md
