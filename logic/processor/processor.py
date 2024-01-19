@@ -1,16 +1,18 @@
 from connector.mongo_helper import MongoHelper
 from connector.neo4j_helper import Neo4jHelper
+from connector.postgres_helper import PostgresHelper
 from utility.logger import Logger
 from typing import Tuple, Optional
 
-#TODO define a base class for processors
 class Processor:
     mongo_helper: MongoHelper
     neo4j_helper: Neo4jHelper
+    postgres_helper: PostgresHelper
 
-    def __init__(self, mongo_helper, neo4j_helper):
+    def __init__(self, mongo_helper=None, neo4j_helper=None, postgres_helper=None):
         self.mongo_helper = mongo_helper
         self.neo4j_helper = neo4j_helper
+        self.postgres_helper = postgres_helper
 
     def run(self, data):
         self.data = data
@@ -33,4 +35,4 @@ class Processor:
         #     Logger().error(str(e), additional_data=tx_id)
     
     def _iterate(self, tx_id) -> Tuple[bool, Optional[str]]:
-        pass
+        raise NotImplementedError

@@ -2,7 +2,7 @@
 from configuration.configs import Configs
 from connector.mongo_helper import MongoHelper
 from connector.neo4j_helper import Neo4jHelper
-from logic.adaptor.db_adaptor import DBAdaptor
+from logic.adaptor.mongo_db_adaptor import MongoDBAdaptor
 from logic.pipeline.pipeline import Pipeline
 from logic.processor.edge_processor.edge_processor import EdgeProcessor
 from logic.processor.graph_insertor.graph_insertor import GraphInsertor
@@ -19,7 +19,7 @@ class DynamicPipeline(Pipeline):
         self.txs_ids = txs_ids
         self.mongo_helper = MongoHelper(Configs.mongo_url_cloud)
         self.neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
-        self.data_adaptor = DBAdaptor(self.mongo_helper, self.neo4j_helper, txs_ids)
+        self.data_adaptor = MongoDBAdaptor(self.mongo_helper, self.neo4j_helper, txs_ids)
         self.processors = self.get_processors(self.mongo_helper, self.neo4j_helper)
     
     def get_processors(self, mongo_helper=None, neo4j_helper=None):

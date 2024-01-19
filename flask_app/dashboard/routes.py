@@ -18,7 +18,6 @@ from logic.controller.adsrecommender_controler import AdsRecommender
 from utility.auction.centralized_auction import CentralizedAuction
 from logic.controller.recommender_controler import RecommenderControler
 from utility.logger import Logger 
-from connector.neo4j_helper import Neo4jHelper
 from configuration.configs import Configs
 
 @blueprint.route("/health-check")
@@ -58,9 +57,8 @@ def recommender():
 
 @blueprint.route('/test', methods=['GET'])
 def test():
-    neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
-    data = neo4j_helper.find_one_node(address='test')
-    return jsonify({'message': f'Received data: {data}'})
+    #TODO: return the latest block number on ethereum
+    pass
     
 @blueprint.route('/submit', methods=['POST'])
 def submit():
@@ -94,7 +92,6 @@ def run_upload_pipeline():
 @login_required
 def run_processors():
     data = request.get_json()
-    #extract txs_ids and selected_processors from the input box
     txs_ids = None
     if 'listings' in data and data['listings'] and data['listings'] != '':
         txs_ids_str = data['listings']
