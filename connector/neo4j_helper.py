@@ -13,8 +13,9 @@ class Neo4jHelper:
         self.url = url
         self.username = username
         self.password = password
-        self.connect()
-        self.add_constraints() 
+        # TODO: Once added Neo4j cloud instances uncomment below
+        # self.connect()
+        # self.add_constraints() 
     
     def add_constraints(self):
         try:

@@ -16,14 +16,13 @@ class MongoHelper:
     def __init__(self, url, debug: bool = False):
         self.debug = debug
         self.url = url
-        self.connect()
+        #TODO: Once added Mongo cloud instance, uncomment below
+        # self.connect()
 
     def connect(self):
         self.client = MongoClient(self.url, server_api=ServerApi('1'))
         dbs = self.client.list_database_names()
         self.db = self.client.get_default_database(default='test')
-        # server_status_result = self.db.command("serverStatus")
-        # pprint(server_status_result)
 
     def drop_collection(self, collection_name):
         try:

@@ -3,7 +3,7 @@ from configuration.configs import Configs
 from connector.neo4j_helper import Neo4jHelper
 from logic.adaptor.adaptor import Adaptor
 
-class DBAdaptor(Adaptor):
+class MongoDBAdaptor(Adaptor):
     mongo_helper: MongoHelper
     neo4j_helper: Neo4jHelper
     
