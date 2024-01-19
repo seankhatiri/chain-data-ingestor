@@ -10,6 +10,7 @@ from jinja2 import TemplateNotFound
 from flask_app.dashboard import blueprint
 from flask_app.dashboard.forms import RetryForm, UploadForm, FailurePipelineForm, MainPipelineForm, ProcessorsForm
 from logic.controller.construct_graph_controler import ConstructGraphControler
+from logic.controller.raw_transactions_controller import RawTransactionController
 from logic.pipeline.dynamic_pipeline.dynamic_pipeline import DynamicPipeline
 from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
@@ -81,7 +82,7 @@ def run_upload_pipeline():
         }
     }
     data = request.get_json()
-    controller = ConstructGraphControler()
+    controller = RawTransactionController()
     pipeline_class = pipelines[data['pipeline']]['class']
     data.pop('pipeline')
     controller.run_pipeline_local(MainPipeline)

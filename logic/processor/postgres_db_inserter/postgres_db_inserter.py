@@ -6,25 +6,25 @@ from connector.postgres_helper import PostgresHelper
 class PostgresDBInserter(Processor):
     postgres_helper:  PostgresHelper
     
-    def __init__(self, postgres_helper=postgres_helper):
-        super().__init__(postgres_helper=postgres_helper)
+    def __init__(self, mongo_helper, neo4j_helper, postgres_helper):
+        super().__init__(mongo_helper, neo4j_helper,postgres_helper)
         self.postgres_helper = postgres_helper
 
     def format_transaction(self, tx):
         return (
-            tx['hash'].hex(),  # tx_id
-            tx['blockNumber'],  # block_number
-            datetime.utcfromtimestamp(tx['timestamp']),  # timestamp (assuming you have the timestamp field)
-            tx['from'],  # from_address
-            tx['to'],  # to_address
-            tx['value'],  # value
-            tx['gasPrice'],  # gas_price
-            tx['gas'],  # gas_used
-            tx['chainId'],  # chain_id
-            'unknown',  # status (since it's not provided in the sample)
-            tx['input'].hex(),  # input_data
-            tx['gasPrice'] * tx['gas']  # transaction_fee
+            tx.get('hash', None).hex() if tx.get('hash') else None,  # tx_id
+            tx.get('blockNumber', None),  # block_number
+            datetime.now(),  # timestamp (assuming you have the timestamp field)
+            tx.get('from', None),  # from_address
+            tx.get('to', None),  # to_address
+            tx.get('value', None),  # value
+            tx.get('gasPrice', None),  # gas_price
+            tx.get('gas', None),  # gas_used
+            tx.get('chainId', None),  # chain_id
+            tx.get('input', None).hex() if tx.get('input') else None,  # input_data
+            tx.get('gasPrice', 0) * tx.get('gas', 0) if tx.get('gasPrice') and tx.get('gas') else None  # transaction_fee
         )
+
 
     def _iterate(self, tx):
         formatted_tx = self.format_transaction(tx)

@@ -19,14 +19,15 @@ class Processor:
         self._process_dataset()
         return self.data
 
+    # TODO: data is the transactions, update all processors except postgres_db_inserter to find the tx_id based on the len of txs
     def _process_dataset(self):
         Logger().info(f'processor started', title=self.__class__.__name__)
-        for tx_id in range(len(self.data)):
-            self._run_iteration(tx_id)
+        for tx in self.data:
+            self._run_iteration(tx)
         Logger().info(f'processor finished', title=self.__class__.__name__)
 
-    def _run_iteration(self, tx_id):
-        self._iterate(tx_id)
+    def _run_iteration(self, tx):
+        self._iterate(tx)
         # try:
         #     ok, error = self._iterate(tx)
         #     if not ok:
@@ -34,5 +35,5 @@ class Processor:
         # except Exception as e:
         #     Logger().error(str(e), additional_data=tx_id)
     
-    def _iterate(self, tx_id) -> Tuple[bool, Optional[str]]:
+    def _iterate(self, tx) -> Tuple[bool, Optional[str]]:
         raise NotImplementedError

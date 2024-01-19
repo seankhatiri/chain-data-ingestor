@@ -21,6 +21,7 @@ Flask-Login==0.6.2
 Flask-Migrate==4.0.2
 Flask-SQLAlchemy==3.0.2
 Flask-WTF==1.1.1
+Flask-Corse==4.0.0
 greenlet==2.0.1
 huggingface-hub==0.12.1
 idna==3.4
@@ -90,3 +91,4 @@ pyarrow
 textdistance[extras]
 antlr4-python3-runtime==4.9.3
 psycopg2==2.9.9
+redis==5.0.1

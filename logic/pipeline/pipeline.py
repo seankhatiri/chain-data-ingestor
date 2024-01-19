@@ -24,14 +24,12 @@ class Pipeline():
         pass
     
     def run(self):
-        self.before_process()
+        # self.before_process()
         self._run_processes()
-        self.after_process()
+        # self.after_process()
 
     def _run_processes(self):
-         # here suppose MongoDBAdaptor as data_adaptor, we need to give it txs, if it's ubiquity_adaptor give chain_name and time interval
-        all_data = self.data_adaptor.fetch_transactions()
+        self.data_adaptor.fetch_transactions()
+        all_data = self.data_adaptor.get_fetched_transactions()
         for processor in self.processors:
-            # can we find a way that if we did the process before, don't run the processor for the tx? except dynamix pipeline
             processed_data = processor.run(all_data)
-        # print(processed_data)
