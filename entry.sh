@@ -25,21 +25,22 @@ start_postgres_on_port() {
 }
 
 create_user_database() {
-    echo "Creating database for $DB_NAME..."
-    psql -h $DB_HOST -U $DB_USER -d $DB_NAME -tAc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" | grep -q 1 || psql -c "CREATE DATABASE $DB_NAME;"
+    echo "Creating database for $POSTGRES_DB_NAME..."
+    psql -h $POSTGRES_DB_HOST -U $POSTGRES_DB_USER -d $POSTGRES_DB_NAME -tAc "SELECT 1 FROM pg_database WHERE datname = '$POSTGRES_DB_NAME'" | grep -q 1 || psql -c "CREATE DATABASE $POSTGRES_DB_NAME;"
 
-    echo "Creating the $DB_USER user..."
-    psql -h $DB_HOST -U $DB_USER -d $DB_NAME -tAc "SELECT 1 FROM pg_roles WHERE rolname = '$DB_USER'" | grep -q 1 || psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';"
+    echo "Creating the $POSTGRES_DB_USER user..."
+    psql -h $POSTGRES_DB_HOST -U $POSTGRES_DB_USER -d $POSTGRES_DB_NAME -tAc "SELECT 1 FROM pg_roles WHERE rolname = '$POSTGRES_DB_USER'" | grep -q 1 || psql -c "CREATE USER $POSTGRES_DB_USER WITH PASSWORD '$POSTGRES_DB_PASS';"
 
-    echo "Granting privileges to the $DB_USER user..."
-    psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;"
+    echo "Granting privileges to the $POSTGRES_DB_USER user..."
+    psql -h $POSTGRES_DB_HOST -U $POSTGRES_DB_USER -d $POSTGRES_DB_NAME -c "GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DB_NAME TO $POSTGRES_DB_USER;"
 
     echo "PostgreSQL setup and user database creation complete."
 }
 
 migration() {
     echo "Running migration..."
-    psql -h $DB_HOST -U $DB_USER -d $DB_NAME -a -f sql/create_tables.sql
+    psql -h $POSTGRES_DB_HOST -U $POSTGRES_DB_USER -d $POSTGRES_DB_NAME -a -f sql/create_schemas.sql
+    psql -h $POSTGRES_DB_HOST -U $POSTGRES_DB_USER -d $POSTGRES_DB_NAME -a -f sql/create_tables.sql
 }
 
 run_flask_app() {
@@ -53,7 +54,7 @@ run_flask_app() {
 }
 
 if [[ "$DOCKER_ENV" != "1" ]]; then
-    DB_HOST=localhost
+    POSTGRES_DB_HOST=localhost
     if is_postgres_installed; then
         echo "PostgreSQL is already installed."
     else
@@ -63,7 +64,7 @@ if [[ "$DOCKER_ENV" != "1" ]]; then
     start_postgres_on_port $DESIRED_PORT
 else
     echo "Using Docker env ..."
-    DB_HOST=db
+    POSTGRES_DB_HOST=db
 fi
 
 create_user_database

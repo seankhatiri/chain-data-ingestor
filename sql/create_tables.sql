@@ -1,14 +1,13 @@
 CREATE TABLE evm_chains.transactions (
     tx_id VARCHAR PRIMARY KEY,
-    block_number INTEGER -- REFERENCES blocks(block_number),
+    block_number INTEGER, -- REFERENCES blocks(block_number),
     timestamp TIMESTAMP,
-    from_address VARCHAR -- REFERENCES addresses(address),
-    to_address VARCHAR -- REFERENCES addresses(address),
+    from_address VARCHAR, -- REFERENCES addresses(address),
+    to_address VARCHAR, -- REFERENCES addresses(address),
     value NUMERIC,
     gas_price NUMERIC,
     gas_used NUMERIC,
     chain_id INTEGER,
-    status VARCHAR,
     input_data TEXT,
     transaction_fee NUMERIC
 );

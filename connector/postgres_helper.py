@@ -54,12 +54,12 @@ class PostgresHelper:
         result = self.run_sql(query, params, self.get_connection_params())
         return result[0][0]
     
-    def insert_transaction(self, transaction, postgres_helper):
+    def insert_transaction(self, transaction):
         insert_query = """
         INSERT INTO evm_chains.transactions (
             tx_id, block_number, timestamp, from_address, to_address, value,
-            gas_price, gas_used, chain_id, status, input_data, transaction_fee
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            gas_price, gas_used, chain_id, input_data, transaction_fee
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (tx_id) DO NOTHING;
         """
         result = self.run_sql(insert_query, transaction)

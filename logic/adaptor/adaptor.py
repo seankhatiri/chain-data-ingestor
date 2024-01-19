@@ -6,3 +6,6 @@ class Adaptor:
 
     def fetch_transactions(self):
         raise NotImplementedError()
+    
+    def get_fetched_transactions(self):
+        raise NotImplementedError()
