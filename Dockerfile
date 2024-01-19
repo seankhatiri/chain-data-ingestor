@@ -68,10 +68,10 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY init.sh ./
+COPY entry.sh ./
 
-RUN chmod +x init.sh
+RUN chmod +x entry.sh
 
 EXPOSE 5001
 
-CMD dockerize -wait tcp://db:5432 -timeout 60s ./init.sh
+CMD dockerize -wait tcp://db:5432 -timeout 60s ./entry.sh
