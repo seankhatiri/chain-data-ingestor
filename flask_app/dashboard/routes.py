@@ -10,6 +10,7 @@ from jinja2 import TemplateNotFound
 from flask_app.dashboard import blueprint
 from flask_app.dashboard.forms import RetryForm, UploadForm, FailurePipelineForm, MainPipelineForm, ProcessorsForm
 from logic.controller.construct_graph_controler import ConstructGraphControler
+from logic.controller.raw_transactions_controller import RawTransactionController
 from logic.pipeline.dynamic_pipeline.dynamic_pipeline import DynamicPipeline
 from logic.pipeline.main_pipeline.main_pipeline import MainPipeline
 from logic.pipeline.failure_pipeline.failure_pipeline import FailurePipeline
@@ -18,7 +19,6 @@ from logic.controller.adsrecommender_controler import AdsRecommender
 from utility.auction.centralized_auction import CentralizedAuction
 from logic.controller.recommender_controler import RecommenderControler
 from utility.logger import Logger 
-from connector.neo4j_helper import Neo4jHelper
 from configuration.configs import Configs
 
 @blueprint.route("/health-check")
@@ -58,9 +58,8 @@ def recommender():
 
 @blueprint.route('/test', methods=['GET'])
 def test():
-    neo4j_helper = Neo4jHelper(Configs.neo4j_url, Configs.neo4j_user, Configs.neo4j_pass)
-    data = neo4j_helper.find_one_node(address='test')
-    return jsonify({'message': f'Received data: {data}'})
+    #TODO: return the latest block number on ethereum
+    pass
     
 @blueprint.route('/submit', methods=['POST'])
 def submit():
@@ -83,7 +82,7 @@ def run_upload_pipeline():
         }
     }
     data = request.get_json()
-    controller = ConstructGraphControler()
+    controller = RawTransactionController()
     pipeline_class = pipelines[data['pipeline']]['class']
     data.pop('pipeline')
     controller.run_pipeline_local(MainPipeline)
@@ -94,7 +93,6 @@ def run_upload_pipeline():
 @login_required
 def run_processors():
     data = request.get_json()
-    #extract txs_ids and selected_processors from the input box
     txs_ids = None
     if 'listings' in data and data['listings'] and data['listings'] != '':
         txs_ids_str = data['listings']

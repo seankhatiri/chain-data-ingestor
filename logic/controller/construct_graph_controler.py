@@ -17,6 +17,6 @@ class ConstructGraphControler(metaclass=Singleton):
 
     
     def run_pipeline_local(self, class_, txs_ids=None, **kwargs):
-        # TODO: How to handel the inputs for each pipeline like txs and selected_processors for dynamic_pipeline
+        # TODO: add the scheduling here
         class_(kwargs['processors'], txs_ids).run()
         pass
