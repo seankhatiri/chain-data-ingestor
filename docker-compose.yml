@@ -5,9 +5,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASS}
     ports:
       - "5432:5432"
 
@@ -20,12 +20,34 @@ services:
     depends_on:
       - db
     environment:
-      - IS_DOCKER=True
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - DB_NAME=${DB_NAME}
+      - POSTGRES_DB_HOST="db"
+      - MODE=local_docker
+      - POSTGRES_DB_PORT=5432
+      - POSTGRES_DB_USER=${POSTGRES_DB_USER}
+      - POSTGRES_DB_PASS=${POSTGRES_DB_PASS}
+      - POSTGRES_DB_NAME=${POSTGRES_DB_NAME}
+      - PORT=${PORT}
+      - NODE_PROVIDER_URL=${NODE_PROVIDER_URL}
+      - POLL_INTERVAL=${POLL_INTERVAL}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - MONGO_URL_CLOUD=${MONGO_URL_CLOUD}
+      - MONGO_URL=${MONGO_URL}
+      - NEO4J_URL_CLOUD=${NEO4J_URL_CLOUD}
+      - NEO4J_URL=${NEO4J_URL}
+      - REDIS_PASS=${REDIS_PASS}
+      - REDIS_URL=${REDIS_URL}
+      - REDIS_PORT=${REDIS_PORT}
+      - NEO4J_USERNAME=${NEO4J_USERNAME}
+      - NEO4J_PASSWORD_CLOUD=${NEO4J_PASSWORD_CLOUD}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - ETHERSCAN_APIKEY=${ETHERSCAN_APIKEY}
+      - ETHERSCAN_URL=${ETHERSCAN_URL}
+      - UBIQUITY_APIKEY=${UBIQUITY_APIKEY}
+      - UBIQUITY_URL=${UBIQUITY_URL}
+      - OPENAI_APIKEY=${OPENAI_APIKEY}
+      - INFURA_ETH=${INFURA_ETH}
+      - COINMARKETCAP_API_KEY=${COINMARKETCAP_API_KEY}
+      - COINMARKETCAP_URL=${COINMARKETCAP_URL}
 
 volumes:
   postgres_data:
