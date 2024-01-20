@@ -5,7 +5,7 @@ source .env
 set +o allexport
 
 DESIRED_PORT=5432
-export PGPASSWORD=$DB_PASS
+export PGPASSWORD=$POSTGRES_DB_PASS
 
 is_postgres_installed() {
     arch -arm64 brew ls --versions postgresql > /dev/null
@@ -45,7 +45,7 @@ migration() {
 
 run_flask_app() {
     echo "Running Flask app..."
-    if [[ "$DOCKER_ENV" != "1" ]]; then
+    if [[ "$MODE" == "local" ]]; then
         python -m venv venv
         source venv/bin/activate
         pip install -r requirements.txt
@@ -53,8 +53,9 @@ run_flask_app() {
     python main.py
 }
 
-if [[ "$DOCKER_ENV" != "1" ]]; then
-    POSTGRES_DB_HOST=localhost
+if [[ "$MODE" == "local" ]]; then
+    echo $MODE
+    echo $POSTGRES_DB_HOST
     if is_postgres_installed; then
         echo "PostgreSQL is already installed."
     else
@@ -62,10 +63,8 @@ if [[ "$DOCKER_ENV" != "1" ]]; then
     fi
 
     start_postgres_on_port $DESIRED_PORT
-else
-    echo "Using Docker env ..."
-    POSTGRES_DB_HOST=db
 fi
+
 
 create_user_database
 migration

@@ -25,13 +25,13 @@ class Configs(Singleton):
     coinmarketcap_apikey: str = config('COINMARKETCAP_API_KEY')
     coinmarketcap_url:str = config('COINMARKETCAP_URL')
 
-    is_docker: bool = config('IS_DOCKER', default=False)
+    postgres_db_host: str = config('POSTGRES_DB_HOST')
     postgres_db_name: str = config('POSTGRES_DB_NAME')
     postgres_db_user: str = config('POSTGRES_DB_USER')
     postgres_db_pass: str = config('POSTGRES_DB_PASS')
 
     postgres_config = {
-        "host": "db" if is_docker else "localhost",
+        "host": postgres_db_host,
         "database": postgres_db_name,
         "user": postgres_db_user,
         "password": postgres_db_pass,
