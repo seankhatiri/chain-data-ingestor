@@ -54,8 +54,6 @@ run_flask_app() {
 }
 
 if [[ "$MODE" == "local" ]]; then
-    echo $MODE
-    echo $POSTGRES_DB_HOST
     if is_postgres_installed; then
         echo "PostgreSQL is already installed."
     else

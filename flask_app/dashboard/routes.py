@@ -20,10 +20,23 @@ from utility.auction.centralized_auction import CentralizedAuction
 from logic.controller.recommender_controler import RecommenderControler
 from utility.logger import Logger 
 from configuration.configs import Configs
+from logic.controller.query_engine_controller.query_engine_controller import QueryEngineController
 
 @blueprint.route("/health-check")
 def health_check():
     return 'healthy', 200
+
+@blueprint.route('/run_query', methods=['POST'])
+def execute_query():
+    try:
+        data = request.get_json()
+        query = data.get('query')
+        if query is None:
+            return jsonify({'error': 'Query not provided'}), 400
+        result = QueryEngineController().run(query)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @blueprint.route('/search', methods=['GET'])
 def search():
