@@ -27,3 +27,5 @@ The project's entry point is the init.sh file, runnable on macOS with:
 
 
 This script first checks for PostgreSQL installation and brings up the database if not present. It creates a database and a database user, then sets up necessary tables using sql/create_tables.sql. Lastly, it runs the Flask application.
+
+Note [TEMP]: when using docker-compose it cannot read the env from compose yml file, so for now if wanna runnning on local use MODE=local and POSTGRES_DB_HOST=localhost, on local_docker use MODEL=local_docker and POSTGRES_DB_HOST=localhost

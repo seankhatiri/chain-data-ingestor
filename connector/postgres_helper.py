@@ -17,10 +17,10 @@ class PostgresHelper:
     '''
         For SELECT queries, fetch and return the results,
         For non-SELECT queries (INSERT, UPDATE, DELETE), commit and return None'''
-    def run_sql(self, query, params):
+    def run_sql(self, query, params=None):
         self.connect()
         try:
-            self.cursor.execute(query, params)
+            self.cursor.execute(query, params) if params else self.cursor.execute(query)
             if query.strip().upper().startswith('SELECT'):
                 return self.cursor.fetchall()
             else:
