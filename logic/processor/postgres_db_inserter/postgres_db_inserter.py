@@ -21,7 +21,7 @@ class PostgresDBInserter(Processor):
             tx.get('gasPrice', None),  # gas_price
             tx.get('gas', None),  # gas_used
             tx.get('chainId', None),  # chain_id
-            tx.get('input', None).hex() if tx.get('input') else None,  # input_data
+            None, #tx.get('input', None).hex() if tx.get('input') else None,  # TODO: currently do not store input data in DB, need to store on S3 bucker
             tx.get('gasPrice', 0) * tx.get('gas', 0) if tx.get('gasPrice') and tx.get('gas') else None  # transaction_fee
         )
 
