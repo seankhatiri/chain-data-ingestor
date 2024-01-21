@@ -1,5 +1,3 @@
-import torch
-from transformers import DistilBertTokenizer, DistilBertModel
 from typing import List, Tuple
 from logic.controller.search_controler import SearchControler
 import json
