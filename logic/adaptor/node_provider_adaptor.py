@@ -36,7 +36,7 @@ class NodeProviderAdaptor(Adaptor):
     def fetch_block_stream(self):
         self.node_provider_helper.connect_socket()
         block_filter = self.node_provider_helper.get_block_filter_event()
-        max_retries = 1
+        max_retries = 3
 
         while True:
             try:
@@ -51,7 +51,7 @@ class NodeProviderAdaptor(Adaptor):
             except Exception as e:
                 retries = 0
                 connected = False
-                Logger().error(message=f"errro {e}")
+                Logger().error(message=f"errro connecting to node provider websocket, retrying ..., error: {e}")
 
                 while retries < max_retries and not connected:
                     try:
