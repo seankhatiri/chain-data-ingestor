@@ -58,6 +58,7 @@ class NodeProviderAdaptor(Adaptor):
                         self.node_provider_helper.connect_socket()
                         block_filter = self.node_provider_helper.get_block_filter_event()
                         connected = True
+                        retries = 0
                         Logger().info(message='Block_stream thread: failed once, but now is connected')
                     except Exception as e:
                         retries += 1
