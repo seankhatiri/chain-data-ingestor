@@ -36,7 +36,7 @@ class NodeProviderAdaptor(Adaptor):
     def fetch_block_stream(self):
         self.node_provider_helper.connect_socket()
         block_filter = self.node_provider_helper.get_block_filter_event()
-        max_retries = 3
+        max_retries = 5
         block_numbers = []
 
         while True:
@@ -54,7 +54,7 @@ class NodeProviderAdaptor(Adaptor):
             except Exception as e:
                 retries = 0
                 connected = False
-                Logger().error(message=f"Block_stream thread: errro connecting to node provider websocket with error: {e}, retrying ...")
+                Logger().error(message=f"Block_stream thread: node provider connection failed with error: {e}, retrying ...")
 
                 while retries < max_retries and not connected:
                     try:
@@ -62,11 +62,10 @@ class NodeProviderAdaptor(Adaptor):
                         block_filter = self.node_provider_helper.get_block_filter_event()
                         connected = True
                         Logger().info(message=f'Block_stream thread: node provider connection failed {retries} times, but now is connected')
-                        retries = 0
                     except Exception as e:
                         retries += 1
                         Logger().info(message=f"Block_stream thread: node provider connection failure count: {retries}, remaining retrys: {max_retries - retries}")
-                        time.sleep(10)
+                        time.sleep(5)
 
                 if not connected:
                     now = datetime.datetime.now()
