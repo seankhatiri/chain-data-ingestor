@@ -1,4 +1,4 @@
-# Seshat Ingestor 
+# On-chain Data Ingestor 
 
 ## Quick Setup
 
